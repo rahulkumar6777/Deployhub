@@ -34,6 +34,10 @@ app.use("/health", (_req, res) => {
 })
 
 
+import secretsRouter from './src/routes/secrets.routes.js'
+app.use('/api/v1/secrets', secretsRouter);
+
+
 app.use((_req, res) => {
     res.status(404).json({ success: false, message: 'Not found' });
 });
