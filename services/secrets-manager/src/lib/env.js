@@ -63,8 +63,8 @@ const schema = z.object({
   DOCKER_USERNAME: z.string(),
   DOCKER_PASSWORD: z.string(),
 
-  DEVLOAD_API_KEY: z.string().optional(),
-  DEVLOAD_PROJECT_ID: z.string().optional(),
+  DOMAINDROP_API_KEY: z.string(),
+  DOMAINDROP_SPACE_ID: z.string(),
 
   FRONTEND_URL: z.string(),
   ADMIN_FRONTEND_URL: z.string().default('http://localhost:5174'),
