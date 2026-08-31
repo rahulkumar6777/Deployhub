@@ -4,7 +4,7 @@ import { print } from "../../shared/utils/print.js";
 import { createInternalAUthMiddleware } from "../../shared/middlewares/internalAuth.js";
 import { createShutdownHandler } from "../../shared/utils/gracefulShutdown.js";
 import { env } from "./src/lib/env.js";
-
+import { connectRedis } from "./src/config/redis.js";
 
 const app = express();
 
@@ -58,6 +58,8 @@ app.use((err, _req, res, _next) => {
 });
 
 export default async function startApp(port) {
+
+    await connectRedis();
 
     const server = app.listen(port, () => {
         print.log(`Identity server running on port ${port}`);
