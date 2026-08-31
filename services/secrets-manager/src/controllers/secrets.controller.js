@@ -8,7 +8,7 @@ export const fetchSecrets = async (req, res) => {
   try {
 
 
-    const bundle = getSecretsForService(serviceName);
+    const bundle = await getSecretsForService(serviceName);
     if (!bundle) {
       logger.warn('Unknown service requested secrets', { serviceName });
       return res.status(404).json({
