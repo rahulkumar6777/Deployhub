@@ -60,7 +60,7 @@ app.use((err, _req, res, _next) => {
 export default async function startApp(port) {
 
     const server = app.listen(port, () => {
-        print.log(`Auth server running on port ${port}`);
+        print.log(`Identity server running on port ${port}`);
     });
 
     const shutdown = createShutdownHandler({
