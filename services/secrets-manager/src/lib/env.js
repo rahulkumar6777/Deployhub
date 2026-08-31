@@ -92,11 +92,6 @@ const schema = z.object({
   ADMIN_EMAIL: z.string().email(),
   ADMIN_SESSION_SECRET: z.string().min(32),
 
-  MINIO_BUCKET: z.string(),
-  MINIO_SECRET_KEY: z.string(),
-  MINIO_ACCESS_KEY: z.string(),
-  MINIO_PUBLIC_HOST: z.string(),
-
   BCRYPT_ROUNDS: z.coerce.number().default(10),
 })
 
