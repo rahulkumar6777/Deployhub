@@ -7,6 +7,12 @@ import { connectRedis } from './src/config/redis.js';
 const app = express();
 
 
+
+app.set("trust proxy", 1);
+app.disable("x-powered-by");
+app.use(express.json({ limit: '100kb' }))
+
+
 // set cors
 import cors from 'cors'
 import { corsOption } from './src/utils/cors.js';
@@ -17,10 +23,6 @@ app.use(cors(corsOption))
 import { traceMiddleware } from './src/middlewares/trace.middleware.js';
 app.use(traceMiddleware);
 
-
-app.set("trust proxy", 1);
-app.disable("x-powered-by");
-app.use(express.json({ limit: '100kb' }))
 
 
 //compression

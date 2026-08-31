@@ -6,7 +6,7 @@ import { getRedis } from '../config/redis.js';
 const limits = {
     Identity: {
         time: 60,
-        limit: 100
+        limit: 10
     },
 }
 
