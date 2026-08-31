@@ -19,6 +19,7 @@ app.use(cookieParser());
 // security
 import helmet from "helmet";
 import hpp from "hpp";
+import { closeDb, connectDb } from "./src/config/mongo.js";
 app.use(helmet());
 app.use(hpp());
 
@@ -60,7 +61,7 @@ app.use((err, _req, res, _next) => {
 export default async function startApp(port) {
 
     await connectRedis();
-
+    await connectDb();
     const server = app.listen(port, () => {
         print.log(`Identity server running on port ${port}`);
     });
@@ -68,7 +69,7 @@ export default async function startApp(port) {
     const shutdown = createShutdownHandler({
         server,
         logger: print,
-        closeResources: [],
+        closeResources: [closeDb],
     });
 
     process.on("SIGINT", shutdown);
