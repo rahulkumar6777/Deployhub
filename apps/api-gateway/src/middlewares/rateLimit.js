@@ -1,5 +1,7 @@
+import { cacheKey } from '../../../../shared/cache/cacheKey.js';
 import { clientIp } from '../../../../shared/utils/clientIp.js';
 import { getRedis } from '../config/redis.js';
+
 
 const limits = {
     Identity: {
@@ -11,7 +13,7 @@ const limits = {
 const rateLimit = async (serviceName, req, res, windowSeconds, limit, inputMessage) => {
     const redis = getRedis();
     const requester = req.user?._id || clientIp(req);
-    const redisKey = `deployhub:RateLimit:${requester}:service:${serviceName}`;
+    const redisKey = cacheKey.RateLimit(requester, serviceName)
 
     const count = await redis.incr(redisKey);
 
