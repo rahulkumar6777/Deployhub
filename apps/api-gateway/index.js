@@ -1,8 +1,21 @@
 import express from 'express';
 import { print } from '../../shared/utils/print.js';
-
+import { createShutdownHandler } from '../../shared/utils/gracefulShutdown.js';
+import { startHealthCheck } from './src/middlewares/healthCheck.js';
+import { connectRedis } from './src/config/redis.js';
 
 const app = express();
+
+
+// set cors
+import cors from 'cors'
+import { corsOption } from './src/utils/cors.js';
+app.use(cors(corsOption))
+
+
+// trace middleware
+import { traceMiddleware } from './src/middlewares/trace.middleware.js';
+app.use(traceMiddleware);
 
 
 app.set("trust proxy", 1);
@@ -14,11 +27,6 @@ app.use(express.json({ limit: '100kb' }))
 import compression from 'compression';
 app.use(compression());
 
-
-// cookie parser
-import cookieParser from 'cookie-parser';
-import { createShutdownHandler } from '../../shared/utils/gracefulShutdown.js';
-app.use(cookieParser());
 
 
 // health point
@@ -36,6 +44,12 @@ app.use("/gateway/health", (_req, res) => {
     })
 })
 
+
+
+import routes from './src/router/index.js';
+app.use('/api', routes);
+
+
 app.use((_req, res) => {
     res.status(404).json({ success: false, message: 'Not found' });
 });
@@ -47,6 +61,8 @@ app.use((err, _req, res, _next) => {
 });
 
 export async function startApp(port) {
+    await connectRedis();
+    const interval = await startHealthCheck();
 
     const server = app.listen(port, () => {
         console.log(`Api Gateway is running on port ${port}`);
@@ -55,7 +71,9 @@ export async function startApp(port) {
     const shutdown = createShutdownHandler({
         server,
         logger: console,
-        closeResources: []
+        closeResources: [
+            () => clearInterval(interval),
+        ],
     });
 
     process.on("SIGINT", shutdown);

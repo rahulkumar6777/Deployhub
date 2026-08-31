@@ -9,7 +9,7 @@ const requiredEnv = [
     'IDENTITY_SERVICE_URL', 'PROJECT_SERVICE_URL', 'MONITORING_SERVICE_URL', 'ANALYTICS_SERVICE_URL',
     'BUILD_SERVICE_URL', 'DEPLOY_SERVICE_URL',
     'ADMIN_SERVICE_URL', 'AGENT_SERVICE_URL',
-    'EMAIL_HOST', 'EMAIL_USER', 'EMAIL_PASS']
+    'EMAIL_HOST', 'EMAIL_USER', 'EMAIL_PASS', 'EMAIL_PORT']
 
 for (const key of requiredEnv) {
     if (!process.env[key]) {
@@ -26,7 +26,7 @@ export const ENV = {
     REDIS_PORT: process.env.REDIS_PORT,
     REDIS_PASSWORD: process.env.REDIS_PASSWORD,
     SERVICES_URL: {
-        AUTH: process.env.IDENTITY_SERVICE_URL,
+        IDENTITY: process.env.IDENTITY_SERVICE_URL,
         PROJECT: process.env.PROJECT_SERVICE_URL,
         BUILD: process.env.BUILD_SERVICE_URL,
         DEPLOY: process.env.DEPLOY_SERVICE_URL,
