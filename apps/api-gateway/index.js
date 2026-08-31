@@ -5,7 +5,7 @@ import { print } from '../../shared/utils/print.js';
 const app = express();
 
 
-app.use('trust proxy', 1);
+app.set("trust proxy", 1);
 app.disable("x-powered-by");
 app.use(express.json({ limit: '100kb' }))
 
@@ -17,6 +17,7 @@ app.use(compression());
 
 // cookie parser
 import cookieParser from 'cookie-parser';
+import { createShutdownHandler } from '../../shared/utils/gracefulShutdown.js';
 app.use(cookieParser());
 
 
@@ -45,7 +46,7 @@ app.use((err, _req, res, _next) => {
     res.status(500).json({ success: false, message: 'Internal server error' });
 });
 
-export default async function startApp(port) {
+export async function startApp(port) {
 
     const server = app.listen(port, () => {
         console.log(`Api Gateway is running on port ${port}`);

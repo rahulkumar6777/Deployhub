@@ -7,5 +7,5 @@ await loadSecrets();
 const { ENV } = await import('./src/lib/env.js');
 
 // start app
-const { default: startApp } = await import("./index.js");
+const { startApp } = await import("./index.js");
 await startApp(ENV.PORT);
