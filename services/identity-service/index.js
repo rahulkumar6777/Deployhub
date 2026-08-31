@@ -48,6 +48,10 @@ app.use(createInternalAUthMiddleware({
 }));
 
 
+import identityRouter from './src/routes/routes.js'
+app.use('/', identityRouter);
+
+
 app.use((_req, res) => {
     res.status(404).json({ success: false, message: 'Not found' });
 });
