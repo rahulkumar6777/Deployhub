@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import { env } from '../config/env.js';
+import { env } from '../lib/env.js';
 import { logger } from '../config/logger.js';
 
 export function authenticate(req, res, next) {
