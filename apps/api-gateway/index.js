@@ -1,7 +1,9 @@
 import express from 'express';
 import { print } from '../../shared/utils/print.js';
 
+
 const app = express();
+
 
 app.use('trust proxy', 1);
 app.disable("x-powered-by");
@@ -9,13 +11,17 @@ app.use(express.json({ limit: '100kb' }))
 
 
 //compression
+import compression from 'compression';
 app.use(compression());
 
 
 // cookie parser
+import cookieParser from 'cookie-parser';
 app.use(cookieParser());
 
-app.use("/health", (_req, res) => {
+
+// health point
+app.use("/gateway/health", (_req, res) => {
 
     const seconds = Math.floor(process.uptime());
 
