@@ -31,7 +31,7 @@ const schema = z.object({
   AGENT_SERVICE_PORT: z.coerce.number().default(4011),
 
   REDIS_HOST: z.string(),
-  REDIS_PORT: z.coerce.number().default('6379'),
+  REDIS_PORT: z.coerce.number(),
   REDIS_PASSWORD: z.string(),
 
   ACCESS_TOKEN_SECRET: z.string().min(32),
@@ -78,8 +78,9 @@ const schema = z.object({
   BUILD_SERVICE_URL: z.string().optional(),
   DEPLOY_SERVICE_URL: z.string().optional(),
   ANALYTICS_SERVICE_URL: z.string(),
-  ADMIN_SERVICE_URL: z.string().default('http://localhost:4010'),
-  AGENT_SERVICE_URL: z.string().default('http://localhost:4011'),
+  ADMIN_SERVICE_URL: z.string(),
+  AGENT_SERVICE_URL: z.string(),
+
 
   // Groq for dashboard AI agent — comma-separated keys
   GROQ_API_KEYS: z.string().min(20),
