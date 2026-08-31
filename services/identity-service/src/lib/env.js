@@ -19,7 +19,7 @@ for (const key of required) {
     }
 };
 
-export const AUTH_ENV = {
+export const env = {
     NODE_ENV: process.env.NODE_ENV,
     PORT: process.env.PORT,
     MONGODB_URI: process.env.MONGODB_URI,
