@@ -1,13 +1,13 @@
 import express from 'express';
 import { logger } from './src/config/logger.js';
-import { print } from '../shared/logger/print.js';
+import { print } from '../../shared/utils/print.js';
 import { getRegisteredServices } from './src/services/secretsRegistry.service.js';
 
 
 const app = express();
 
 
-app.set("trust proxy", true);
+app.set("trust proxy", 1);
 app.disable("x-powered-by");
 app.use(express.json({ limit: '100kb' }))
 

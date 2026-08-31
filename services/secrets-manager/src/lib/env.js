@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import dotenv from 'dotenv'
-import { print } from '../../../shared/logger/print.js';
+import { print } from '../../../../shared/utils/print.js';
 
 
 dotenv.config({
