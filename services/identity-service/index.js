@@ -5,6 +5,8 @@ import { createInternalAUthMiddleware } from "../../shared/middlewares/internalA
 import { createShutdownHandler } from "../../shared/utils/gracefulShutdown.js";
 import { env } from "./src/lib/env.js";
 import { connectRedis } from "./src/config/redis.js";
+import { checkFileUploaderReady } from "./src/config/fileUploaderChecker.js";
+
 
 const app = express();
 
@@ -66,6 +68,7 @@ export default async function startApp(port) {
 
     await connectRedis();
     await connectDb();
+    await checkFileUploaderReady();
     const server = app.listen(port, () => {
         print.log(`Identity server running on port ${port}`);
     });
