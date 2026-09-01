@@ -4,6 +4,7 @@ import { getRedis } from "../config/redis.js";
 import { cacheKey } from "../../../../shared/cache/cacheKey.js";
 import { env } from "../lib/env.js";
 import { generateNetworkName } from '../utils/netwrokName.js'
+import { transporter } from "../utils/transporter.js";
 
 const RegistrationExpiryMs = 10 * 60 * 1000;
 const getRegistrationExpiry = () => new Date(Date.now() + RegistrationExpiryMs);
@@ -31,11 +32,12 @@ export const initRegister = async (data) => {
         registrationExpiresAt: getRegistrationExpiry()
     })
 
-    const redisKey = cacheKey.UserOtp(newUser.email);
+    const redisKey = cacheKey.UserOtp(user.email);
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
     await redis
         .multi()
         .hset(redisKey, {
-            email: newUser.email,
+            email: user.email,
             otp
         })
         .expire(redisKey, 600)
@@ -43,7 +45,7 @@ export const initRegister = async (data) => {
 
     await transporter.sendMail({
         from: `"Deployhub" <${env.EMAIL_USER}>`,
-        to: newUser.email,
+        to: user.email,
         subject: 'Your Registration Otp',
         text: `Your Registration otp is ${otp}`
     });
@@ -81,7 +83,16 @@ export const verifyRegister = async (data) => {
     }
 
     const cachedOtp = await redis.hgetall(redisKey);
-    if (otp !== cachedOtp) {
+    console.log('cachedOtp', cachedOtp)
+    if (!cachedOtp || !cachedOtp.otp) {
+        throw new AppError('Registration expired. Please register again', 400);
+    }
+
+    if (cachedOtp.email !== email) {
+        throw new AppError('Invalid email', 400);
+    }
+
+    if (otp !== cachedOtp.otp) {
         throw new AppError('Invalid otp', 400);
     }
 
@@ -100,6 +111,7 @@ export const verifyRegister = async (data) => {
         }
     );
 
+    redis.del(redisKey);
     return user;
 
 }

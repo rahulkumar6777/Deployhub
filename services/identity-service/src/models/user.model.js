@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
-import { AUTH_ENV } from '../lib/env.js';
+import { env } from '../lib/env.js';
 
 const User_Status = Object.freeze([
     "pending",
@@ -104,7 +104,7 @@ userSchema.index({ registrationExpiresAt: 1 }, {
 userSchema.pre('save', async function () {
     if (this.provider !== 'local') return;
     if (!this.isModified('password') || !this.password) return;
-    this.password = await bcrypt.hash(this.password, Number(AUTH_ENV.BCRYPT_ROUNDS || 10));
+    this.password = await bcrypt.hash(this.password, Number(env.BCRYPT_ROUNDS || 10));
 });
 
 userSchema.methods.comparePassword = function (plain) {
