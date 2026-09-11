@@ -39,6 +39,9 @@ const email = (req) => {
 export const INGRESS_POLICY = policy('gateway:ingress', 60, 120, (req) => `ip:${clientIp(req)}`);
 
 const IDENTITY_POLICIES = Object.freeze({
+    'GET /health': [
+        policy('identity:health:ip',  60, 10, (req) => `ip:${clientIp(req)}`),
+    ],
     'POST /register/init': [
         policy('identity:register-init:ip', 15 * 60, 10, (req) => `ip:${clientIp(req)}`),
         policy('identity:register-init:email', 15 * 60, 3, (req) => {
@@ -114,6 +117,7 @@ export const createRateLimitMiddleware = (
 
         next();
     } catch (error) {
+        console.log(error)
         error.code = error.code || 'RATE_LIMIT_UNAVAILABLE';
         next(error);
     }
