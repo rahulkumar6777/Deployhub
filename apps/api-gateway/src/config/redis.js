@@ -13,6 +13,7 @@ export const connectRedis = async () => {
         host: ENV.REDIS_HOST,
         port: ENV.REDIS_PORT,
         password: ENV.REDIS_PASSWORD,
+        ...(ENV.REDIS_TLS ? { tls: {} } : {}),
         maxRetriesPerRequest: 3,
         enableReadyCheck: true,
         lazyConnect: true
@@ -30,5 +31,17 @@ export const getRedis = () => {
     }
 
     return redis;
+}
+
+export const closeRedis = async () => {
+    const client = redis;
+    redis = undefined;
+    if (!client) return;
+
+    try {
+        await client.quit();
+    } catch {
+        client.disconnect();
+    }
 }
 

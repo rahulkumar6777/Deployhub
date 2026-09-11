@@ -96,11 +96,11 @@ export const checkHealthMiddleware = (serviceName) => {
         }
 
         if (!service.isHealthy) {
+            res.setHeader('Retry-After', String(HEALTH_CHECK_INTERVAL_MS / 1000));
+            res.setHeader('Cache-Control', 'no-store');
             return res.status(503).json({
                 success: false,
-                message: `${serviceName} service is currently unavailable`,
-                retryAfter: `${HEALTH_CHECK_INTERVAL_MS / 1000}s`,
-                lastChecked: service.lastChecked,
+                message: 'Service is currently unavailable',
                 traceId: req.traceId
             })
         }
