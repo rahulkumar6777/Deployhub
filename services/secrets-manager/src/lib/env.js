@@ -33,6 +33,7 @@ const schema = z.object({
   REDIS_HOST: z.string(),
   REDIS_PORT: z.coerce.number(),
   REDIS_PASSWORD: z.string(),
+  REDIS_TLS: z.string(),
 
   ACCESS_TOKEN_SECRET: z.string().min(32),
   ACCESS_TOKEN_EXPIRY: z.string().default('2h'),
