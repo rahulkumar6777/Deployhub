@@ -10,7 +10,7 @@ import { refreshTokenController } from '../controllers/RefreshToken.Controller.j
 import { logoutController } from '../controllers/logout.controller.js';
 import upload, { handleUploadError } from '../middleware/multer.middleware.js';
 import { profilePicValidator } from '../validators/profilePic.js';
-import { userFullNameCOntroller, userProfilePicController } from '../controllers/user.controller.js';
+import { getUserReposController, userFullNameCOntroller, userProfilePicController } from '../controllers/user.controller.js';
 import { userFullNameValidator } from '../validators/user.js';
 
 
@@ -28,6 +28,6 @@ identityServiceRouter.get('/refresh/token', refreshTokenController)
 identityServiceRouter.post('/logout', logoutController)
 identityServiceRouter.put('/user/profile-pic', verifyJWT, upload.single('profilePic'), handleUploadError, profilePicValidator, userProfilePicController);
 identityServiceRouter.put('/user/fullname', verifyJWT, userFullNameValidator, userFullNameCOntroller);
-
+identityServiceRouter.get('/user/repos', verifyJWT, getUserReposController);
 
 export default identityServiceRouter;
