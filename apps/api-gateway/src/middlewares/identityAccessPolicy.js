@@ -4,6 +4,7 @@ const IDENTITY_PUBLIC_ROUTES = new Map([
     ['/register/verify', new Set(['POST'])],
     ['/github', new Set(['GET'])],
     ['/github/callback', new Set(['GET'])],
+    ['/login', new Set(['POST'])],
 ]);
 
 const respond = (req, res, status, message) =>
