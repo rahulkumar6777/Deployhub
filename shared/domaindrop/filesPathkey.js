@@ -1,3 +1,3 @@
 export const domainDropFilesPathKey = {
-    profilePic: (userId) => `users/${userId}/profile-pic`
+    profilePic: (filename, userId) => `users/${userId}/profile-pic/${filename}`
 }

@@ -1,7 +1,7 @@
 import nodemailer from "nodemailer";
 import { ENV } from "../lib/env.js";
 
-export const ALERT_EMAIL = ENV.EMAIL_HOST;
+export const ALERT_EMAIL = ENV.EMAIL_USER;
 
 export const transporter = nodemailer.createTransport({
   host: ENV.EMAIL_HOST,
