@@ -6,6 +6,7 @@ import { loginValidator } from '../validators/login.js';
 import { loginController } from '../controllers/login.controller.js';
 import { verifyJWT } from '../middleware/auth.middleware.js';
 import { listSessionsController, revokeSessionController, revokeAllSessionsController } from '../controllers/session.controller.js';
+import { refreshTokenController } from '../controllers/RefreshToken.Controller.js';
 
 
 const identityServiceRouter = express.Router();
@@ -18,6 +19,6 @@ identityServiceRouter.post('/login', loginValidator, loginController)
 identityServiceRouter.get('/sessions', verifyJWT, listSessionsController);
 identityServiceRouter.delete('/sessions/:tokenId', verifyJWT, revokeSessionController);
 identityServiceRouter.delete('/sessions', verifyJWT, revokeAllSessionsController);
-
+identityServiceRouter.get('/refresh/token', refreshTokenController)
 
 export default identityServiceRouter;

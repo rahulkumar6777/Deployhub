@@ -79,6 +79,9 @@ const IDENTITY_POLICIES = Object.freeze({
     'DELETE /sessions/:tokenId': [
         policy('identity:sessions-revoke:ip', 5 * 60, 30, (req) => `ip:${clientIp(req)}`),
     ],
+    'GET /refresh/token': [
+        policy('identity:refresh:token:ip', 60, 60, (req) => `ip:${clientIp(req)}`)
+    ]
 });
 
 export const resolveIdentityPolicies = (req) =>
