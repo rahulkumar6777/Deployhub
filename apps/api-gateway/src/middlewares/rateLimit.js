@@ -81,6 +81,9 @@ const IDENTITY_POLICIES = Object.freeze({
     ],
     'GET /refresh/token': [
         policy('identity:refresh:token:ip', 60, 60, (req) => `ip:${clientIp(req)}`)
+    ],
+    'POST /logout': [
+        policy('identity:logout:ip', 5 * 60, 30, (req) => `ip:${clientIp(req)}`)
     ]
 });
 
