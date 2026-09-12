@@ -4,6 +4,8 @@ import { initRegisterController, verifyRegisterController } from '../controllers
 import { githubCallbackController, githubLoginController } from '../controllers/githubLogin.js';
 import { loginValidator } from '../validators/login.js';
 import { loginController } from '../controllers/login.controller.js';
+import { verifyJWT } from '../middleware/auth.middleware.js';
+import { listSessionsController, revokeSessionController, revokeAllSessionsController } from '../controllers/session.controller.js';
 
 
 const identityServiceRouter = express.Router();
@@ -13,5 +15,9 @@ identityServiceRouter.post('/register/verify', registerVerifyValidator, verifyRe
 identityServiceRouter.get('/github', githubLoginController);
 identityServiceRouter.get('/github/callback', githubCallbackController);
 identityServiceRouter.post('/login', loginValidator, loginController)
+identityServiceRouter.get('/sessions', verifyJWT, listSessionsController);
+identityServiceRouter.delete('/sessions/:tokenId', verifyJWT, revokeSessionController);
+identityServiceRouter.delete('/sessions', verifyJWT, revokeAllSessionsController);
+
 
 export default identityServiceRouter;

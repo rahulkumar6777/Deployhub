@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import { resolveIdentityRoutePath } from './identityAccessPolicy.js';
 
 let configuredRedisProvider = () => {
     throw new Error('Rate-limit Redis provider is not configured');
@@ -69,10 +70,19 @@ const IDENTITY_POLICIES = Object.freeze({
             return value ? `email:${value}` : null;
         }),
     ],
+    'GET /sessions': [
+        policy('identity:sessions-list:ip', 5 * 60, 30, (req) => `ip:${clientIp(req)}`),
+    ],
+    'DELETE /sessions': [
+        policy('identity:sessions-revoke-all:ip', 5 * 60, 30, (req) => `ip:${clientIp(req)}`),
+    ],
+    'DELETE /sessions/:tokenId': [
+        policy('identity:sessions-revoke:ip', 5 * 60, 30, (req) => `ip:${clientIp(req)}`),
+    ],
 });
 
 export const resolveIdentityPolicies = (req) =>
-    IDENTITY_POLICIES[`${req.method} ${req.path}`] || [];
+    IDENTITY_POLICIES[`${req.method} ${resolveIdentityRoutePath(req.path)}`] || [];
 
 const redisKey = (policyName, subject) => {
     const digest = createHash('sha256').update(subject).digest('hex');

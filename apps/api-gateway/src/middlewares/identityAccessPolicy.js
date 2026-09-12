@@ -5,13 +5,17 @@ const IDENTITY_PUBLIC_ROUTES = new Map([
     ['/github', new Set(['GET'])],
     ['/github/callback', new Set(['GET'])],
     ['/login', new Set(['POST'])],
+    ['/sessions', new Set(['GET', 'DELETE'])],
+    ['/sessions/:tokenId', new Set(['DELETE'])],
 ]);
+
+export const resolveIdentityRoutePath = (path) => /^\/sessions\/[^/]+$/.test(path) ? '/sessions/:tokenId' : path;
 
 const respond = (req, res, status, message) =>
     res.status(status).json({ success: false, message, traceId: req.traceId });
 
 export const enforceIdentityAccessPolicy = (req, res, next) => {
-    const allowedMethods = IDENTITY_PUBLIC_ROUTES.get(req.path);
+    const allowedMethods = IDENTITY_PUBLIC_ROUTES.get(resolveIdentityRoutePath(req.path));
 
     if (!allowedMethods) {
         return respond(req, res, 404, 'Not found');
