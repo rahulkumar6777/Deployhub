@@ -87,6 +87,9 @@ const IDENTITY_POLICIES = Object.freeze({
     ],
     'PUT /user/profile-pic': [
         policy(':users:profile-pic:ip', 5 * 60, 60, (req) => `ip:${clientIp(req)}`)
+    ],
+    'PUT /user/fullname': [
+        policy(':users:fullname:ip', 5 * 60, 60, (req) => `ip:${clientIp(req)}`)
     ]
 });
 

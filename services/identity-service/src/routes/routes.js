@@ -10,7 +10,8 @@ import { refreshTokenController } from '../controllers/RefreshToken.Controller.j
 import { logoutController } from '../controllers/logout.controller.js';
 import upload, { handleUploadError } from '../middleware/multer.middleware.js';
 import { profilePicValidator } from '../validators/profilePic.js';
-import { userProfilePicController } from '../controllers/user.controller.js';
+import { userFullNameCOntroller, userProfilePicController } from '../controllers/user.controller.js';
+import { userFullNameValidator } from '../validators/user.js';
 
 
 const identityServiceRouter = express.Router();
@@ -24,10 +25,9 @@ identityServiceRouter.get('/sessions', verifyJWT, listSessionsController);
 identityServiceRouter.delete('/sessions/:tokenId', verifyJWT, revokeSessionController);
 identityServiceRouter.delete('/sessions', verifyJWT, revokeAllSessionsController);
 identityServiceRouter.get('/refresh/token', refreshTokenController)
-identityServiceRouter.post('/logut', logoutController)
-identityServiceRouter.put('/user/profile-pic', verifyJWT, upload.single('profilePic'), handleUploadError, profilePicValidator, userProfilePicController)
-
-
+identityServiceRouter.post('/logout', logoutController)
+identityServiceRouter.put('/user/profile-pic', verifyJWT, upload.single('profilePic'), handleUploadError, profilePicValidator, userProfilePicController);
+identityServiceRouter.put('/user/fullname', verifyJWT, userFullNameValidator, userFullNameCOntroller);
 
 
 export default identityServiceRouter;
