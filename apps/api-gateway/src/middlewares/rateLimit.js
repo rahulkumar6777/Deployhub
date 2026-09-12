@@ -84,6 +84,9 @@ const IDENTITY_POLICIES = Object.freeze({
     ],
     'POST /logout': [
         policy('identity:logout:ip', 5 * 60, 30, (req) => `ip:${clientIp(req)}`)
+    ],
+    'PUT /user/profile-pic': [
+        policy(':users:profile-pic:ip', 5 * 60, 60, (req) => `ip:${clientIp(req)}`)
     ]
 });
 
