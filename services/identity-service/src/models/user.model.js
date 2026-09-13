@@ -79,14 +79,6 @@ const userSchema = new mongoose.Schema(
         lockUntil: {
             type: Date
         },
-
-
-        // here we add fiels of networkid of docker every user wise so it is centelized and we can easily manage the network of docker for each user
-        networkName: {
-            type: String,
-            required: true,
-            index: true
-        },
     },
     {
         timestamps: true,

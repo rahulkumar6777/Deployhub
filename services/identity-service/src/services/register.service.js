@@ -3,7 +3,6 @@ import { AppError } from '../../../../shared/errors/AppError.js'
 import { getRedis } from "../config/redis.js";
 import { cacheKey } from "../../../../shared/cache/cacheKey.js";
 import { env } from "../lib/env.js";
-import { generateNetworkName } from '../utils/netwrokName.js'
 import { transporter } from "../utils/transporter.js";
 
 const RegistrationExpiryMs = 10 * 60 * 1000;
@@ -96,14 +95,13 @@ export const verifyRegister = async (data) => {
         throw new AppError('Invalid otp', 400);
     }
 
-    const networkName = generateNetworkName(user._id);
     await User.findOneAndUpdate(
         {
             _id: user._id,
             status: "pending"
         },
         {
-            $set: { status: "active", networkName: networkName },
+            $set: { status: "active" },
             $unset: { registrationExpiresAt: "" }
         },
         {

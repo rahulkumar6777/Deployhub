@@ -1,5 +1,5 @@
 import { validationResult } from "express-validator";
-import { getUserGIthubToken, getUSerNetworkName, getUserRepositories, userFullnameService, userProfilePicService } from "../services/user.service.js";
+import { getUserGIthubToken, getUserRepositories, userFullnameService, userProfilePicService } from "../services/user.service.js";
 import fs from 'fs/promises';
 import { returnError } from "../../../../shared/errors/sendError.js";
 
@@ -93,23 +93,6 @@ export const getUserReposController = async (req, res) => {
 
         return res.status(200).json({
             repositories
-        })
-
-    } catch (error) {
-        res.status(error.status || 500).json({
-            error: error.message || 'internal server Error'
-        })
-    }
-}
-
-
-export const getUserNetworkNameController = async (req, res) => {
-    try {
-
-        const userId = req.params.userId;
-        const networkName = await getUSerNetworkName(userId);
-        return res.status(200).json({
-            networkName
         })
 
     } catch (error) {

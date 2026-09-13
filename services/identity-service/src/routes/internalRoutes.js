@@ -14,7 +14,6 @@ const internal = internalApiCallMiddleware({ secret: env.INTERNAL_SERVICE_TALKIN
 internalRouter.use(internal);
 
 
-internalRouter.get('/users/:userId/network-name', getUserNetworkNameController);
 internalRouter.get('/users/:userId/github-access-token', githubAccessTokenController);
 
 

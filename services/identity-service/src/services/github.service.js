@@ -4,7 +4,6 @@ import { User } from "../models/user.model.js";
 import { AppError } from "../../../../shared/errors/AppError.js";
 import { getRedis } from "../config/redis.js";
 import { encryptGithubAccessToken } from "../utils/githubTokenCrypto.js";
-import { generateNetworkName } from "../utils/netwrokName.js";
 import { cacheKey } from "../../../../shared/cache/cacheKey.js";
 
 
@@ -92,9 +91,6 @@ export const githubCallback = async (data) => {
             password: null,
         });
 
-        const networkName = generateNetworkName(user._id);
-
-        user.networkName = networkName
         await user.save({ validateBeforeSave: false })
 
     } else {

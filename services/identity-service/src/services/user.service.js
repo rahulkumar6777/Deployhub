@@ -132,17 +132,6 @@ export const getUserRepositories = async (userId) => {
     return repos;
 }
 
-export const getUSerNetworkName = async (userId) => {
-
-    const user = await User.findById(userId).select('networkName');
-
-    if (!user) {
-        throw new AppError('User not found', 404);
-    }
-
-    return user.networkName;
-}
-
 export const getUserGIthubToken = async (userId) => {
 
     const user = await User.findById(userId).select('+githubAccessToken');

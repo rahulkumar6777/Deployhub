@@ -1,14 +1,16 @@
 import { DomainDrop } from '@domaindrop/node'
 import { env } from '../lib/env.js'
 import { print } from '../../../../shared/utils/print.js'
+import { domainDrop } from '../../../../shared/domaindrop/domaindrop.js'
 
-
-export const drop = new DomainDrop({
-    apiKey: env.DOMAINDROP_API_KEY
-})
 
 export const checkFileUploaderReady = async () => {
 
+
+    const drop = await domainDrop({
+        DomainDrop,
+        apiKey: env.DOMAINDROP_API_KEY
+    });
     const spaceId = env.DOMAINDROP_SPACE_ID
 
     try {
