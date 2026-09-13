@@ -83,19 +83,19 @@ const IDENTITY_POLICIES = Object.freeze({
         policy('identity:refresh:token:ip', 60, 60, (req) => `ip:${clientIp(req)}`)
     ],
     'POST /logout': [
-        policy('identity:logout:ip', 5 * 60, 30, (req) => `ip:${clientIp(req)}`)
+        policy('identity:logout:ip', 60 * 60, 5, (req) => `ip:${clientIp(req)}`)
     ],
     'PUT /user/profile-pic': [
-        policy(':users:profile-pic:ip', 5 * 60, 60, (req) => `ip:${clientIp(req)}`)
+        policy(':users:profile-pic:ip', 60 * 60, 10, (req) => `ip:${clientIp(req)}`)
     ],
     'PUT /user/fullname': [
-        policy(':users:fullname:ip', 5 * 60, 60, (req) => `ip:${clientIp(req)}`)
+        policy(':users:fullname:ip', 60 * 60, 10, (req) => `ip:${clientIp(req)}`)
     ],
     'GET /user/repos': [
         policy(':users:repos:ip', 60 * 60, 60, (req) => `ip:${clientIp(req)}`)
     ],
     'POST /resendotp': [
-        policy(':users:resendotp:ip', 10 * 60, 60, (req) => `ip:${clientIp(req)}`)
+        policy(':users:resendotp:ip', 60 * 60, 10, (req) => `ip:${clientIp(req)}`)
     ]
 });
 
