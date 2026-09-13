@@ -43,7 +43,14 @@ app.use("/health", (_req, res) => {
 })
 
 
-// internal auth
+// Service calls authenticate independently of the gateway secret.
+import internalRouter from './src/routes/internalRoutes.js';
+app.use('/internal', internalRouter, (_req, res) => {
+    res.status(404).json({ success: false, message: 'Not found' });
+});
+
+
+// Gateway authentication for public identity endpoints.
 app.use(createInternalAUthMiddleware({
     secret: env.INTERNAL_SECRET,
     logger: print,
