@@ -82,7 +82,7 @@ export const verifyRegister = async (data) => {
     }
 
     const cachedOtp = await redis.hgetall(redisKey);
-    console.log('cachedOtp', cachedOtp)
+    
     if (!cachedOtp || !cachedOtp.otp) {
         throw new AppError('Registration expired. Please register again', 400);
     }

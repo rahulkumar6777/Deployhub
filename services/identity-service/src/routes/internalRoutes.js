@@ -1,7 +1,7 @@
 import express from 'express';
 import { internalApiCallMiddleware } from '../../../../shared/middlewares/interalApiCall.js';
 import { env } from '../lib/env.js';
-import { getUserNetworkNameController, githubAccessTokenController } from '../controllers/user.controller.js';
+import {  githubAccessTokenController } from '../controllers/user.controller.js';
 
 
 const internalRouter = express.Router({

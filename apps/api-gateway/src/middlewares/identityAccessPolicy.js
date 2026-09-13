@@ -12,6 +12,7 @@ const IDENTITY_PUBLIC_ROUTES = new Map([
     ['/user/profile-pic', new Set(['PUT'])],
     ['/user/fullname', new Set(['PUT'])],
     ['/user/repos', new Set(['GET'])],
+    ['/resendotp', new Set(['POST'])],
 ]);
 
 export const resolveIdentityRoutePath = (path) => /^\/sessions\/[^/]+$/.test(path) ? '/sessions/:tokenId' : path;
