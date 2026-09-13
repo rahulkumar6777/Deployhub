@@ -7,6 +7,7 @@ import { decryptGithubAccessToken } from "../utils/githubTokenCrypto.js";
 import { domainDrop } from "../../../../shared/domaindrop/domaindrop.js";
 import { env } from "../lib/env.js";
 import { deleteFromDomainDrop } from "../../../../shared/domaindrop/delete.js";
+import { getFileUrlDomainDrop } from "../../../../shared/domaindrop/getfileUrl.js";
 
 
 export const userFullnameService = async (userId, fullName) => {
@@ -55,9 +56,11 @@ export const userProfilePicService = async (userId, file) => {
         label: 'profile'
     });
 
+    const profilePicUrl = await getFileUrlDomainDrop({ domainDrop: drop, fileId: uplaodResult.id, DomainDropError })
+
     const updateUser = await User.findOneAndUpdate(
         { _id: userId },
-        { profileFileId: uplaodResult.id },
+        { profileFileId: uplaodResult.id, profilePic: profilePicUrl },
         { returnDocument: 'after', upsert: false }
     );
 
