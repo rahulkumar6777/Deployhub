@@ -1,6 +1,7 @@
 const MAX_REQUEST_TARGET_LENGTH = 4096;
 const RESERVED_CLIENT_HEADERS = Object.freeze([
     'x-internal-secret',
+    'x-microservice-secret',
     'x-user-context',
 ]);
 
