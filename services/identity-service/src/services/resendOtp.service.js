@@ -22,8 +22,8 @@ export const resendOtp = async (type, email) => {
     };
 
     const user = await User.findOne({ email });
-    if (!user) {
-        throw new AppError("invalid Email", 404)
+    if (user) {
+        throw new AppError("you cannot send registration otp, beacuse you already registered", 400)
     }
 
     const redisKey = typeRedisCacheKey.registration(email)
