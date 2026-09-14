@@ -6,5 +6,11 @@ export const services = {
         isHealthy: false,
         lastChecked: null,
         lastError: null
+    },
+    Project: {
+        url: ENV.SERVICES_URL.PROJECT,
+        isHealthy: false,
+        lastChecked: null,
+        lastError: null
     }
 }

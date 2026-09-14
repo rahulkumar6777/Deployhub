@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto';
 import { resolveIdentityRoutePath } from './identityAccessPolicy.js';
+import { resolveProjectRoutePath } from './projectAccessPolicy.js';
 
 let configuredRedisProvider = () => {
     throw new Error('Rate-limit Redis provider is not configured');
@@ -22,8 +23,7 @@ end
 return { count, ttl }
 `;
 
-const policy = (name, windowSeconds, limit, subject) =>
-    Object.freeze({ name, windowSeconds, limit, subject });
+const policy = (name, windowSeconds, limit, subject) => Object.freeze({ name, windowSeconds, limit, subject });
 
 const clientIp = (req) => {
     let value = String(req.ip || req.socket?.remoteAddress || 'unknown').trim();
@@ -37,8 +37,11 @@ const email = (req) => {
     return value ? value.slice(0, 320) : null;
 };
 
+
 export const INGRESS_POLICY = policy('gateway:ingress', 60, 120, (req) => `ip:${clientIp(req)}`);
 
+
+// ye pe identity servicr ka policy hai
 const IDENTITY_POLICIES = Object.freeze({
     'GET /health': [
         policy('identity:health:ip', 60, 10, (req) => `ip:${clientIp(req)}`),
@@ -101,14 +104,25 @@ const IDENTITY_POLICIES = Object.freeze({
         policy(':users:me:ip', 60, 60, (req) => `ip:${clientIp(req)}`)
     ]
 });
+export const resolveIdentityPolicies = (req) => IDENTITY_POLICIES[`${req.method} ${resolveIdentityRoutePath(req.path)}`] || [];
 
-export const resolveIdentityPolicies = (req) =>
-    IDENTITY_POLICIES[`${req.method} ${resolveIdentityRoutePath(req.path)}`] || [];
+
+
+// yeha pe project service ka policy hai
+const PROJECT_POLICIES = Object.freeze({
+    'GET /health': [
+        policy('project:health:ip', 60, 60, (req) => `ip:${clientIp(req)}`),
+    ],
+});
+export const resolveProjectPolicies = (req) => PROJECT_POLICIES[`${req.method} ${resolveProjectRoutePath(req.path)}`] || [];
+
+
 
 const redisKey = (policyName, subject) => {
     const digest = createHash('sha256').update(subject).digest('hex');
     return `deployhub:rate-limit:${policyName}:${digest}`;
 };
+
 
 const consume = async (redis, selectedPolicy, req) => {
     const subject = selectedPolicy.subject(req);
@@ -129,6 +143,7 @@ const consume = async (redis, selectedPolicy, req) => {
 
     return { count, ttl };
 };
+
 
 export const createRateLimitMiddleware = (
     resolvePolicies,
@@ -161,5 +176,7 @@ export const createRateLimitMiddleware = (
     }
 };
 
+
 export const ingressRateLimitMiddleware = createRateLimitMiddleware([INGRESS_POLICY]);
 export const identityRateLimitMiddleware = createRateLimitMiddleware(resolveIdentityPolicies);
+export const projectRateLimitMiddleware = createRateLimitMiddleware(resolveProjectPolicies);

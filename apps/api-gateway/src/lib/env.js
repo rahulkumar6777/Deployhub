@@ -103,6 +103,7 @@ export const ENV = Object.freeze({
     REDIS_TLS: process.env.REDIS_TLS?.toLowerCase() === 'true',
     SERVICES_URL: Object.freeze({
         IDENTITY: httpUrl('IDENTITY_SERVICE_URL'),
+        PROJECT: httpUrl('PROJECT_SERVICE_URL'),
     }),
     INTERNAL_SECRET: internalSecret,
     SERVICE_NAME: 'api-gateway',
