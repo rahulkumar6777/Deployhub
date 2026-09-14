@@ -151,3 +151,20 @@ export const getUserGIthubToken = async (userId) => {
     return decryptGithubAccessToken(user.githubAccessToken);
 
 }
+
+
+export const userMeService = async (data) => {
+
+    const userId = data?._id;
+    if (!userId) {
+        throw new AppError('Invalid User', 401);
+    }
+
+    const userdata = await User.findById(userId).select('fullName provider email profilePic createdAt updatedAt').lean();
+
+    if (!userdata) {
+        throw new AppError('Invalid User', 401);
+    }
+
+    return userdata;
+}

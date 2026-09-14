@@ -1,5 +1,5 @@
 import { validationResult } from "express-validator";
-import { getUserGIthubToken, getUserRepositories, userFullnameService, userProfilePicService } from "../services/user.service.js";
+import { getUserGIthubToken, getUserRepositories, userFullnameService, userMeService, userProfilePicService } from "../services/user.service.js";
 import fs from 'fs/promises';
 import { returnError } from "../../../../shared/errors/sendError.js";
 
@@ -35,9 +35,7 @@ export const userFullNameCOntroller = async (req, res) => {
         })
 
     } catch (error) {
-        res.status(error.status || 500).json({
-            error: error.msg || 'internal server Error'
-        })
+        returnError(res, error);
     }
 };
 
@@ -96,9 +94,7 @@ export const getUserReposController = async (req, res) => {
         })
 
     } catch (error) {
-        res.status(error.status || 500).json({
-            error: error.message || 'internal server Error'
-        })
+        returnError(res, error);
     }
 }
 
@@ -116,8 +112,23 @@ export const githubAccessTokenController = async (req, res) => {
 
 
     } catch (error) {
-        res.status(error.status || 500).json({
-            error: error.message || 'internal server Error'
-        })
+        returnError(res, error);
     }
 }
+
+
+export const userMeController = async (req, res) => {
+    try {
+
+        const userData = await userMeService(req?.user);
+
+        return res.status(200).json({
+            status: "success",
+            userData
+        })
+
+    } catch (error) {
+        returnError(res, error);
+    }
+};
+
