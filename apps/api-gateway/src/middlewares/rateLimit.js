@@ -96,6 +96,9 @@ const IDENTITY_POLICIES = Object.freeze({
     ],
     'POST /resendotp': [
         policy(':users:resendotp:ip', 60 * 60, 10, (req) => `ip:${clientIp(req)}`)
+    ],
+    'GET /user/me': [
+        policy(':users:me:ip', 60, 60, (req) => `ip:${clientIp(req)}`)
     ]
 });
 
