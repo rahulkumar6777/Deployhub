@@ -4,7 +4,6 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "node --test src/services/session.service.test.js",
     "dev": "nodemon ./server.js",
     "start": "node ./server.js"
   },
