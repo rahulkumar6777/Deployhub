@@ -53,6 +53,24 @@ export const getSecretsForService = async (serviceName) => {
             INTERNAL_SERVICE_TALKING_SECRET: env.INTERNAL_SERVICE_TALKING_SECRET,
             BCRYPT_ROUNDS: env.BCRYPT_ROUNDS
         },
+        'project-service': {
+            NODE_ENV: env.NODE_ENV,
+            PORT: env.PROJECT_SERVICE_PORT,
+            MONGODB_URI: env.PROJECT_SERVICE_MONGODB_URI,
+            REDIS_HOST: env.REDIS_HOST,
+            REDIS_PORT: env.REDIS_PORT,
+            REDIS_PASSWORD: env.REDIS_PASSWORD,
+            REDIS_TLS: env.REDIS_TLS,
+            INTERNAL_SECRET: env.INTERNAL_SECRET,
+            RAZORPAY_KEY_ID: env.RAZORPAY_KEY_ID,
+            RAZORPAY_KEY_SECRET: env.RAZORPAY_KEY_SECRET,
+            IDENTITY_SERVICE_URL: env.IDENTITY_SERVICE_URL,
+            INTERNAL_SERVICE_TALKING_SECRET: env.INTERNAL_SERVICE_TALKING_SECRET,
+            BUILD_SERVICE_URL: env.BUILD_SERVICE_URL,
+            DOCKER_USERNAME: env.DOCKER_USERNAME,
+            DOCKER_PASSWORD: env.DOCKER_PASSWORD,
+            GITHUB_WEBHOOK_SECRET: env.GITHUB_WEBHOOK_SECRET
+        },
     }
 
     return registry[serviceName] ?? null;
@@ -61,5 +79,7 @@ export const getSecretsForService = async (serviceName) => {
 export function getRegisteredServices() {
     return [
         'api-gateway',
+        'identity-service',
+        'project-service',
     ];
 }
