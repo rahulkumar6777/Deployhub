@@ -1,0 +1,42 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
+const required = [
+    'PORT', 'NODE_ENV', 'PROJECT_SERVICE_NAME',
+    'SECRETS_MANAGER_URL',
+    'BOOTSTRAP_TOKEN', 'INTERNAL_SERVICE_TALKING_SECRET', 'INTERNAL_SECRET',
+    'MONGODB_URI',
+    'REDIS_HOST', 'REDIS_PORT', 'REDIS_PASSWORD',
+    'RAZORPAY_KEY_ID', 'RAZORPAY_KEY_SECRET',
+    'IDENTITY_SERVICE_URL', 'BUILD_SERVICE_URL',
+    'DOCKER_USERNAME', 'DOCKER_PASSWORD',
+    'GITHUB_WEBHOOK_SECRET'
+]
+
+for (const key of required) {
+    if (!process.env[key]) {
+        throw new Error(`key missing ${key}`)
+    }
+}
+
+export const env = {
+    PORT: process.env.PORT,
+    NODE_ENV: process.env.NODE_ENV,
+    PROJECT_SERVICE_NAME: process.env.PROJECT_SERVICE_NAME,
+    SECRETS_MANAGER_URL: process.env.SECRETS_MANAGER_URL,
+    BOOTSTRAP_TOKEN: process.env.BOOTSTRAP_TOKEN,
+    MONGODB_URI: process.env.MONGODB_URI,
+    REDIS_HOST: process.env.REDIS_HOST,
+    REDIS_PORT: process.env.REDIS_PORT,
+    REDIS_PASSWORD: process.env.REDIS_PASSWORD,
+    RAZORPAY_KEY_ID: process.env.RAZORPAY_KEY_ID,
+    RAZORPAY_KEY_SECRET: process.env.RAZORPAY_KEY_SECRET,
+    RABBITMQ_URL: process.env.RABBITMQ_URL,
+    INTERNAL_SERVICE_TALKING_SECRET: process.env.INTERNAL_SERVICE_TALKING_SECRET,
+    INTERNAL_SECRET: process.env.INTERNAL_SECRET,
+    IDENTITY_SERVICE_URL: process.env.IDENTITY_SERVICE_URL,
+    BUILD_SERVICE_URL: process.env.BUILD_SERVICE_URL,
+    DOCKER_USERNAME: process.env.DOCKER_USERNAME,
+    DOCKER_PASSWORD: process.env.DOCKER_PASSWORD,
+    GITHUB_WEBHOOK_SECRET: process.env.GITHUB_WEBHOOK_SECRET
+};
