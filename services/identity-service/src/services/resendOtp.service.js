@@ -21,9 +21,16 @@ export const resendOtp = async (type, email) => {
         throw new Error(`Invalid OTP type: ${type}`);
     };
 
-    const user = await User.findOne({ email });
-    if (user) {
-        throw new AppError("you cannot send registration otp, beacuse you already registered", 400)
+    if (type === 'registration') {
+        const user = await User.findOne({ email });
+        if (user) {
+            throw new AppError("you cannot send registration otp, beacuse you already registered", 400)
+        }
+    } else {
+        const user = await User.findOne({ email });
+        if (!user) {
+            throw new AppError("User not Found", 404)
+        }
     }
 
     const redisKey = typeRedisCacheKey.registration(email)
