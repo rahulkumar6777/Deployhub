@@ -113,7 +113,12 @@ const PROJECT_POLICIES = Object.freeze({
     'GET /health': [
         policy('project:health:ip', 60, 60, (req) => `ip:${clientIp(req)}`),
     ],
+    'POST /projects': [
+        policy('project:create:ip', 60 * 60, 4, (req) => `ip:${clientIp(req)}`),
+    ]
 });
+
+
 export const resolveProjectPolicies = (req) => PROJECT_POLICIES[`${req.method} ${resolveProjectRoutePath(req.path)}`] || [];
 
 
