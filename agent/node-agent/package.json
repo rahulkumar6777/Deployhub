@@ -1,0 +1,26 @@
+{
+  "name": " node-agent",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "test": "vitest run",
+    "dev": "nodemon src/main.js",
+    "start": "node src/main.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "dockerode": "^5.0.1",
+    "dotenv": "^18.0.9",
+    "fastify": "^5.12.7",
+    "pino": "^10.4.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14",
+    "vitest": "^5.0.5"
+  }
+}
