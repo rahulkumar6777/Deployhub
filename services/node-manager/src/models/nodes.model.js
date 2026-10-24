@@ -26,8 +26,14 @@ const nodeSchema = new mongoose.Schema({
     httpPortRangeEnd: {
         type: String,
         requied: true
+    },
+    nodeIp: {
+        type: String,
+    },
+    nodeUrl: {
+        type: String
     }
-})
+});
 
 nodeSchema.index({ nodeId: 1 }, { unique: true });
 
