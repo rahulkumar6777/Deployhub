@@ -16,7 +16,7 @@ export const buildApp = () => {
             status: "ok",
             service: "node-manager"
         });
-    })
+    });
 
     return app;
 }

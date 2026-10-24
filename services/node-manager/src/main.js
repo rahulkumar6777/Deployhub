@@ -14,7 +14,7 @@ const start = async (port) => {
 
     app.listen(port, () => {
         console.log(`Node Manager service is running on port ${port}`);
-    })
-}
+    });
+};
 
 start(envs.PORT);
