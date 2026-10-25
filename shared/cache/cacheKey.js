@@ -5,5 +5,7 @@ export const cacheKey = {
     createSessionKey: (userId, tokenId) => `deployhub:users:${userId}:session:${tokenId}`,
     deleteProjectSchedule: () => `deployhub:users:project:delete:schedule`,
     createRefreshRotationKey: (userId, tokenId) => `deployhub:refreshRotation:${userId}:${tokenId}`,
-    createRefreshLockKey: (userId, tokenId) => `deployhub:refreshLock:${userId}:${tokenId}`
+    createRefreshLockKey: (userId, tokenId) => `deployhub:refreshLock:${userId}:${tokenId}`,
+    nodes: (nodeId) => `deployhub:nodes:${nodeId}`,
+    nodeResourceSnapshot: (nodeId) => `deployhub:nodes:${nodeId}:resourceSnapshot`,
 }
