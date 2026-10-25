@@ -6,6 +6,11 @@ import { envs } from "./lib/env.js";
 const app = buildApp();
 
 
+// routes
+import routes from "./router/router.route.js";
+
+app.use('/api/v1', routes);
+
 const start = async (port) => {
 
     await connectToMongoDB();
