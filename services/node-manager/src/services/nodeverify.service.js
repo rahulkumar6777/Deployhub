@@ -42,7 +42,7 @@ export const nodeVerifyService = async (nodeId, secret, resources) => {
     const snapshot = await NodeResourceSnapshot.findOneAndUpdate(
         { nodeId },
         { $set: { cpuTotalPercent, cpuUsagePercent, memoryTotalBytes, memoryUsedBytes, diskTotalBytes, diskUsedBytes } },
-        { new: true, runValidators: true }
+        { returnDocument: "after", runValidators: true }
     );
     if (!snapshot) throw new AppError("Node resource snapshot not found", 404);
 
