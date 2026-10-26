@@ -11,7 +11,7 @@ export const confirmNodeAllocationService = async (allocationId, success) => {
         },
         {
             $set: {
-                status: success ? "confirmed" : "failed",
+                status: success ? "completed" : "failed",
                 expiresAt: new Date()
             }
         },
@@ -23,7 +23,7 @@ export const confirmNodeAllocationService = async (allocationId, success) => {
         if (!existingAllocation) {
             throw new AppError("Allocation not found or expired", 404);
         }
-        if (existingAllocation.status === "confirmed" && success) {
+        if (existingAllocation.status === "completed" && success) {
             return existingAllocation;
         }
         throw new AppError("Allocation is no longer pending", 409);

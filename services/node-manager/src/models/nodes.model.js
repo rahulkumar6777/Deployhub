@@ -5,6 +5,11 @@ const nodeSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    type: {
+        type: String,
+        enum: ["build", "deploy"],
+        required: true
+    },
     region: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Region",

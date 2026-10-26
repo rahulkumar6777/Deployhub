@@ -5,6 +5,11 @@ const nodeAllocationSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    nodeType: {
+        type: String,
+        enum: ["build", "deploy"],
+        required: true
+    },
     cpuPercent: {
         type: Number,
         required: true
@@ -19,7 +24,7 @@ const nodeAllocationSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ["pending", "confirmed", "failed"],
+        enum: ["pending", "completed", "failed"],
         default: "pending"
     },
     expiresAt: {

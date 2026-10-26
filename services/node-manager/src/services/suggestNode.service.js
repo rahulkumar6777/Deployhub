@@ -15,10 +15,10 @@ const releaseNodeLock = `
 
 export const suggestNodeService = async (resources) => {
 
-    const { cpuPercent, memoryBytes, storageBytes } = resources;
+    const { nodeType, cpuPercent = 0, memoryBytes = 0, storageBytes = 0 } = resources;
     const redis = getRedis();
 
-    const nodes = await Node.find({ status: "active" }).lean();
+    const nodes = await Node.find({ status: "active", type: nodeType }).lean();
     if (!nodes || nodes.length === 0) {
         throw new AppError("No active nodes found", 404);
     }
@@ -39,8 +39,39 @@ export const suggestNodeService = async (resources) => {
             }
 
             const now = new Date();
+            if (nodeType === "build") {
+                const activeBuilds = await NodeAllocation.countDocuments({
+                    nodeId: node.nodeId,
+                    nodeType: "build",
+                    status: "pending",
+                    expiresAt: { $gt: now }
+                });
+
+                if (activeBuilds >= 2) {
+                    continue;
+                }
+
+                const allocation = new NodeAllocation({
+                    nodeId: node.nodeId,
+                    nodeType,
+                    cpuPercent: 0,
+                    memoryBytes: 0,
+                    storageBytes: 0
+                });
+                await allocation.save();
+
+                return {
+                    allocationId: allocation._id,
+                    expiresAt: allocation.expiresAt,
+                    nodeId: node.nodeId,
+                    nodeUrl: node.nodeUrl,
+                    nodeIp: node.nodeIp
+                };
+            }
+
             const allocations = await NodeAllocation.find({
                 nodeId: node.nodeId,
+                nodeType: "deploy",
                 $or: [
                     { status: "pending", expiresAt: { $gt: now } }
                 ]
@@ -64,6 +95,7 @@ export const suggestNodeService = async (resources) => {
 
             const allocation = new NodeAllocation({
                 nodeId: node.nodeId,
+                nodeType,
                 cpuPercent,
                 memoryBytes,
                 storageBytes
