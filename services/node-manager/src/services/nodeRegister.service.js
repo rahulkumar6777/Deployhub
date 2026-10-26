@@ -9,7 +9,7 @@ import { AppError } from "../../../../shared/errors/AppError.js";
 
 export const nodeRegisterService = async (nodeData) => {
 
-    const { nodeId, regionId, httpPortRangeStart, httpPortRangeEnd, nodeIp, nodeUrl, cpuTotalPercent, memoryTotalBytes, diskTotalBytes } = nodeData;
+    const { nodeId, nodetype ,regionId, httpPortRangeStart, httpPortRangeEnd, nodeIp, nodeUrl, cpuTotalPercent, memoryTotalBytes, diskTotalBytes } = nodeData;
 
     const region = await Region.findById(regionId);
     if (!region) {
@@ -31,6 +31,7 @@ export const nodeRegisterService = async (nodeData) => {
 
     const node = new Node({
         nodeId,
+        type: nodetype,
         region: region._id,
         httpPortRangeStart,
         httpPortRangeEnd,

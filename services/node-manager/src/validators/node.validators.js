@@ -8,7 +8,17 @@ export const addNodeValidator = [
         .withMessage("Node ID is required")
         .isString()
         .withMessage("Node ID must be a String"),
-
+    body('nodetype')
+        .trim()
+        .notEmpty()
+        .withMessage("nodetype is Required")
+        .toLowerCase()
+        .custom((value) => {
+            if (value !== 'build' & value !== 'deploy') {
+                throw new Error("invalid nodetype");
+            }
+            return true;
+        }),
     body("regionId")
         .trim()
         .notEmpty()
@@ -85,7 +95,15 @@ export const getNodebyRegionCodeValidator = [
 ];
 
 export const suggestNodeValidator = [
+    body("nodeType")
+        .trim()
+        .notEmpty()
+        .withMessage("Node type is required")
+        .isIn(["build", "deploy"])
+        .withMessage("Node type must be build or deploy"),
+
     body("cpuPercent")
+        .if((value, { req }) => req.body.nodeType === "deploy")
         .notEmpty()
         .withMessage("CPU requirement is required")
         .isFloat({ min: 0 })
@@ -93,6 +111,7 @@ export const suggestNodeValidator = [
         .toFloat(),
 
     body("memoryBytes")
+        .if((value, { req }) => req.body.nodeType === "deploy")
         .notEmpty()
         .withMessage("Memory requirement in bytes is required")
         .isInt({ min: 0 })
@@ -100,6 +119,7 @@ export const suggestNodeValidator = [
         .toInt(),
 
     body("storageBytes")
+        .if((value, { req }) => req.body.nodeType === "deploy")
         .notEmpty()
         .withMessage("Storage requirement in bytes is required")
         .isInt({ min: 0 })
