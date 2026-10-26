@@ -53,10 +53,6 @@ export const nodeRegisterService = async (nodeData) => {
     nodeCredential.node = node._id;
     nodeResourceSnapshot.node = node._id;
 
-    const redis = getRedis();
-
-    await redis.set(cacheKey.nodes(nodeId), JSON.stringify(node));
-
     await nodeCredential.save();
     await node.save();
     await nodeResourceSnapshot.save();
