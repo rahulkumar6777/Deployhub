@@ -8,4 +8,5 @@ export const cacheKey = {
     createRefreshLockKey: (userId, tokenId) => `deployhub:refreshLock:${userId}:${tokenId}`,
     nodes: (nodeId) => `deployhub:nodes:${nodeId}`,
     nodeResourceSnapshot: (nodeId) => `deployhub:nodes:${nodeId}:resourceSnapshot`,
+    nodelockKey: (nodeId) => `deployhub:nodes:node-resource-lock:${nodeId}`,
 }
