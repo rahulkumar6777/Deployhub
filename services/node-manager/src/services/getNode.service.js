@@ -1,7 +1,7 @@
 import { Region } from "../models/region.model.js";
 import { Node } from "../models/nodes.model.js";
 import { AppError } from "../../../../shared/errors/AppError.js";
-
+import { NodeResourceSnapshot } from "../models/NodeResourceSnapshot.model.js";
 
 export const getNodebyRegionCode = async (regioncode) => {
 
@@ -17,4 +17,20 @@ export const getNodebyRegionCode = async (regioncode) => {
     }
 
     return nodes;
+}
+
+
+export const getNodeByIdServices = async (nodeId) => {
+
+    const node = await Node.findById(nodeId).populate("region").lean()
+    console.log(node)
+    if(!node){
+        throw new AppError("invalid nodeid" , 404);
+    }
+
+    const nodeResources = await NodeResourceSnapshot.findOne({ nodeId: node.nodeId}).lean()
+
+    return {
+         ...node, ...nodeResources
+    }
 }

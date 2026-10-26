@@ -16,6 +16,11 @@ export const nodeRegisterService = async (nodeData) => {
         throw new AppError("Region not found", 404);
     }
 
+    const checkNode = await Node.findOne({nodeId: nodeId});
+    if(checkNode){
+        throw new AppError("nodeid already exist, please enter another", 409)
+    }
+
     // here i generate a random password for the node and store it in the NodeCredential collection
     const nodePassword = crypto.randomBytes(32).toString("hex");
 
@@ -51,7 +56,6 @@ export const nodeRegisterService = async (nodeData) => {
     const redis = getRedis();
 
     await redis.set(cacheKey.nodes(nodeId), JSON.stringify(node));
-    await redis.set(cacheKey.nodeResourceSnapshot(nodeId), JSON.stringify(nodeResourceSnapshot));
 
     await nodeCredential.save();
     await node.save();

@@ -7,11 +7,18 @@ export const connectToMongoDB = async () => {
 
         await mongoose.connect(envs.MONGODB_URI, {
             maxPoolSize: 20,
-            minPoolSize: 10,
-            serverSelectionTimeoutMS: 5000,
+            minPoolSize: 10
         });
         console.log("MongoDB Connected");
 
+        mongoose.connection.on("error", (err) => {
+            console.error("MongoDB error:", err);
+        });
+
+        mongoose.connection.on("disconnected", () => {
+            console.warn("MongoDB disconnected");
+        });
+        
     } catch (error) {
         throw new Error(`Error while connect to MongoDb , ${error.message}`)
     }

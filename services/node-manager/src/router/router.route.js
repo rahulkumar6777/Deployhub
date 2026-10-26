@@ -3,8 +3,8 @@ import { addRegionValidator, getRegionByIdValidator } from '../validators/region
 import { addRegionController } from '../controllers/addregion.controller.js';
 import { getRegionByIdController, getRegionsController } from '../controllers/getregion.controller.js';
 import { nodeRegisterController } from '../controllers/nodeRegister.controller.js';
-import { getNodebyRegionCodeValidator } from '../validators/node.validators.js';
-import { getNodebyRegionCodeController } from '../controllers/getNode.controller.js';
+import { getNodeByIdValidator, getNodebyRegionCodeValidator } from '../validators/node.validators.js';
+import { getNodeByIdController, getNodebyRegionCodeController } from '../controllers/getNode.controller.js';
 
 const router = express.Router();
 
@@ -13,6 +13,7 @@ router.get('/regions', getRegionsController);
 router.get('/regions/:id', getRegionByIdValidator, getRegionByIdController);
 router.post('/regions', addRegionValidator, addRegionController);
 router.post('/nodes', nodeRegisterController);
-router.get('/regions/:regioncode/nodes' , getNodebyRegionCodeValidator , getNodebyRegionCodeController)
+router.get('/regions/:regioncode/nodes' , getNodebyRegionCodeValidator , getNodebyRegionCodeController);
+router.get('/nodes/:id' , getNodeByIdValidator , getNodeByIdController)
 
 export default router;

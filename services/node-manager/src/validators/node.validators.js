@@ -83,3 +83,13 @@ export const getNodebyRegionCodeValidator = [
         .isString()
         .withMessage('Region code must be a string')
 ];
+
+
+export const getNodeByIdValidator = [
+    param("id")
+        .trim()
+        .notEmpty()
+        .withMessage("nodeid ID is required")
+        .isMongoId()
+        .withMessage('nodeid ID must be a valid MongoDB ObjectId'),
+]
