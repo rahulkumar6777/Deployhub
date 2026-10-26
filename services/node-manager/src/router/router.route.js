@@ -5,6 +5,7 @@ import { getRegionByIdController, getRegionsController } from '../controllers/ge
 import { nodeRegisterController } from '../controllers/nodeRegister.controller.js';
 import { getNodeByIdValidator, getNodebyRegionCodeValidator } from '../validators/node.validators.js';
 import { getNodeByIdController, getNodebyRegionCodeController } from '../controllers/getNode.controller.js';
+import { nodeVerifyController } from '../controllers/nodeverify.controller.js';
 
 const router = express.Router();
 
@@ -13,6 +14,7 @@ router.get('/regions', getRegionsController);
 router.get('/regions/:id', getRegionByIdValidator, getRegionByIdController);
 router.post('/regions', addRegionValidator, addRegionController);
 router.post('/nodes', nodeRegisterController);
+router.post('/nodes/:id/verify', nodeVerifyController);
 router.get('/regions/:regioncode/nodes' , getNodebyRegionCodeValidator , getNodebyRegionCodeController);
 router.get('/nodes/:id' , getNodeByIdValidator , getNodeByIdController)
 
