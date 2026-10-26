@@ -21,6 +21,8 @@ export const getNodeResources = async () => {
         (sum, disk) => sum + disk.available, 0
     );
 
+    console.log(cpuUsagePercent)
+
     return {
         cpu: {
             cores: cpu.cores,
