@@ -65,22 +65,43 @@ export const addNodeValidator = [
         .withMessage("Node URL must be a valid HTTP or HTTPS URL"),
 
     body("cpuTotalPercent")
-        .notEmpty()
-        .withMessage("CPU total percentage is required")
+        .custom((value, { req }) => {
+            if (req.body.nodetype === "deploy") {
+                if (value === undefined || value === null) {
+                    throw new Error("CPU total percentage is required");
+                }
+            }
+            return true;
+        })
+        .optional()
         .isFloat({ min: 100, max: 1000000 })
-        .withMessage("CPU total percentage must be between 0 and 100")
+        .withMessage("CPU total percentage must be between 100 and 1000000")
         .toFloat(),
 
     body("memoryTotalBytes")
-        .notEmpty()
-        .withMessage("Total memory is required")
+        .custom((value, { req }) => {
+            if (req.body.nodetype === "deploy") {
+                if (value === undefined || value === null) {
+                    throw new Error("Total memory is required");
+                }
+            }
+            return true;
+        })
+        .optional()
         .isInt({ min: 1 })
         .withMessage("Total memory must be a positive integer")
         .toInt(),
 
     body("diskTotalBytes")
-        .notEmpty()
-        .withMessage("Total disk size is required")
+        .custom((value, { req }) => {
+            if (req.body.nodetype === "deploy") {
+                if (value === undefined || value === null) {
+                    throw new Error("Total disk size is required");
+                }
+            }
+            return true;
+        })
+        .optional()
         .isInt({ min: 1 })
         .withMessage("Total disk size must be a positive integer")
         .toInt(),

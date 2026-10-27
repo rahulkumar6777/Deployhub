@@ -9,15 +9,15 @@ import { AppError } from "../../../../shared/errors/AppError.js";
 
 export const nodeRegisterService = async (nodeData) => {
 
-    const { nodeId, nodetype ,regionId, httpPortRangeStart, httpPortRangeEnd, nodeIp, nodeUrl, cpuTotalPercent, memoryTotalBytes, diskTotalBytes } = nodeData;
+    const { nodeId, nodetype, regionId, httpPortRangeStart, httpPortRangeEnd, nodeIp, nodeUrl, cpuTotalPercent, memoryTotalBytes, diskTotalBytes } = nodeData;
 
     const region = await Region.findById(regionId);
     if (!region) {
         throw new AppError("Region not found", 404);
     }
 
-    const checkNode = await Node.findOne({nodeId: nodeId});
-    if(checkNode){
+    const checkNode = await Node.findOne({ nodeId: nodeId });
+    if (checkNode) {
         throw new AppError("nodeid already exist, please enter another", 409)
     }
 
@@ -36,27 +36,33 @@ export const nodeRegisterService = async (nodeData) => {
         httpPortRangeStart,
         httpPortRangeEnd,
         nodeIp,
-        nodeUrl
+        nodeUrl,
+        lastVerfied: new Date(),
     });
 
-    const nodeResourceSnapshot = new NodeResourceSnapshot({
-        node: node._id,
-        nodeId,
-        cpuTotalPercent,
-        memoryTotalBytes,
-        diskTotalBytes,
-        cpuUsagePercent: "0",
-        memoryUsedBytes: "0",
-        diskUsedBytes: "0"
-    });
+    let nodeResourceSnapshot;
+
+    if (nodetype === 'deploy') {
+        nodeResourceSnapshot = new NodeResourceSnapshot({
+            node: node._id,
+            nodeId,
+            cpuTotalPercent,
+            memoryTotalBytes,
+            diskTotalBytes,
+            cpuUsagePercent: "0",
+            memoryUsedBytes: "0",
+            diskUsedBytes: "0"
+        });
+
+        nodeResourceSnapshot.node = node._id;
+        await nodeResourceSnapshot.save();
+    }
 
 
     nodeCredential.node = node._id;
-    nodeResourceSnapshot.node = node._id;
 
     await nodeCredential.save();
     await node.save();
-    await nodeResourceSnapshot.save();
 
     return {
         node,

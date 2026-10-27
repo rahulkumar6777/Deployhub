@@ -37,6 +37,9 @@ const nodeSchema = new mongoose.Schema({
     },
     nodeUrl: {
         type: String
+    },
+    lastVerfied: {
+        type: Date
     }
 });
 
