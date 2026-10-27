@@ -107,6 +107,48 @@ export const addNodeValidator = [
         .toInt(),
 ];
 
+export const nodeVerifyValidator = [
+    param('id')
+        .notEmpty()
+        .withMessage('nodeId is required')
+        .isString()
+        .withMessage('nodeId must be a string'),
+    body('secret')
+        .notEmpty()
+        .withMessage('secret is required')
+        .isString()
+        .withMessage('secret must be a string'),
+    body("resources.cpu.cores")
+        .optional()
+        .isNumeric()
+        .withMessage("cpu.cores must be a number"),
+
+    body("resources.cpu.usagePercent")
+        .optional()
+        .isNumeric()
+        .withMessage("cpu.usagePercent must be a number"),
+
+    body("resources.memory.totalBytes")
+        .optional()
+        .isNumeric()
+        .withMessage("memory.totalBytes must be a number"),
+
+    body("resources.memory.usedBytes")
+        .optional()
+        .isNumeric()
+        .withMessage("memory.usedBytes must be a number"),
+
+    body("resources.disk.totalBytes")
+        .optional()
+        .isNumeric()
+        .withMessage("disk.totalBytes must be a number"),
+
+    body("resources.disk.usedBytes")
+        .optional()
+        .isNumeric()
+        .withMessage("disk.usedBytes must be a number"),
+]
+
 export const getNodebyRegionCodeValidator = [
     param('regioncode')
         .notEmpty()

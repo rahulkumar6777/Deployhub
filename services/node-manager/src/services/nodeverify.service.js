@@ -25,29 +25,39 @@ export const nodeVerifyService = async (nodeId, secret, resources) => {
         throw new AppError("Invalid node credentials", 401);
     }
 
-    if (!resources?.cpu || !resources?.memory || !resources?.disk) {
-        throw new AppError("Node resources are required", 400);
-    }
-    const cpuTotalPercent = Number(resources.cpu.cores) * 100;
-    const cpuUsagePercent = Number(resources.cpu.usagePercent);
-    const memoryTotalBytes = Number(resources.memory.totalBytes);
-    const memoryUsedBytes = Number(resources.memory.usedBytes);
-    const diskTotalBytes = Number(resources.disk.totalBytes);
-    const diskUsedBytes = Number(resources.disk.usedBytes);
-    const values = [cpuTotalPercent, cpuUsagePercent, memoryTotalBytes, memoryUsedBytes, diskTotalBytes, diskUsedBytes];
-    if (values.some((value) => !Number.isFinite(value) || value < 0)) {
-        throw new AppError("Invalid node resource values", 400);
+    
+    node.lastVerfied = new Date();
+    node.save({validateBeforeSave: false});
+
+    let snapshot;
+
+    if (node.type === 'deploy') {
+        if (!resources?.cpu || !resources?.memory || !resources?.disk) {
+            throw new AppError("Node resources are required", 400);
+        }
+
+        const cpuTotalPercent = Number(resources.cpu.cores) * 100;
+        const cpuUsagePercent = Number(resources.cpu.usagePercent);
+        const memoryTotalBytes = Number(resources.memory.totalBytes);
+        const memoryUsedBytes = Number(resources.memory.usedBytes);
+        const diskTotalBytes = Number(resources.disk.totalBytes);
+        const diskUsedBytes = Number(resources.disk.usedBytes);
+        const values = [cpuTotalPercent, cpuUsagePercent, memoryTotalBytes, memoryUsedBytes, diskTotalBytes, diskUsedBytes];
+        if (values.some((value) => !Number.isFinite(value) || value < 0)) {
+            throw new AppError("Invalid node resource values", 400);
+        }
+
+        snapshot = await NodeResourceSnapshot.findOneAndUpdate(
+            { nodeId },
+            { $set: { cpuTotalPercent, cpuUsagePercent, memoryTotalBytes, memoryUsedBytes, diskTotalBytes, diskUsedBytes } },
+            { returnDocument: "after", runValidators: true }
+        );
+        if (!snapshot) throw new AppError("Node resource snapshot not found", 404);
+
+        node.lastHeartbeat = new Date();
+        node.status = "active";
+        await node.save();
     }
 
-    const snapshot = await NodeResourceSnapshot.findOneAndUpdate(
-        { nodeId },
-        { $set: { cpuTotalPercent, cpuUsagePercent, memoryTotalBytes, memoryUsedBytes, diskTotalBytes, diskUsedBytes } },
-        { returnDocument: "after", runValidators: true }
-    );
-    if (!snapshot) throw new AppError("Node resource snapshot not found", 404);
-
-    node.lastHeartbeat = new Date();
-    node.status = "active";
-    await node.save();
     return { nodeId, verified: true, resources: snapshot };
 };
