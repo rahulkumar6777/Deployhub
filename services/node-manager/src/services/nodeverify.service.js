@@ -25,9 +25,10 @@ export const nodeVerifyService = async (nodeId, secret, resources) => {
         throw new AppError("Invalid node credentials", 401);
     }
 
-    
-    node.lastVerfied = new Date();
-    node.save({validateBeforeSave: false});
+
+    await Node.findByIdAndUpdate(node._id, {
+        lastVerfied: new Date
+    });
 
     let snapshot;
 
