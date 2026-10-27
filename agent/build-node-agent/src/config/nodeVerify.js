@@ -5,7 +5,7 @@ const NODE_MANAGER_URLS = process.env.NODE_MANAGER_URL;
 
 export const nodeVerify = async () => {
 
-    
+
     const nodeId = process.env.NODE_ID;
     const nodeSecret = process.env.NODE_SECRET;
 
@@ -18,8 +18,9 @@ export const nodeVerify = async () => {
         }
     );
 
+    cons
     if (response.status !== 200) {
-        throw new Error(`Node verification failed with status ${response.status}`);
+        process.exit(1);
     }
 
     console.log("node verified");
