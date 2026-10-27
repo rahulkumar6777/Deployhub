@@ -9,12 +9,9 @@ const app = await buildApp();
 import './jobs/nodeverification.jobs.js'
 
 
-console.log(process.env.NODE_MANAGER_URL)
-
 const start = async (port) => {
 
-    //await nodeVerify();
-
+    await nodeVerify();
     app.listen(port, () => {
         console.log(`server is running on port ${port}`)
     })

@@ -18,7 +18,7 @@ export const nodeVerify = async () => {
         }
     );
 
-    cons
+
     if (response.status !== 200) {
         process.exit(1);
     }
