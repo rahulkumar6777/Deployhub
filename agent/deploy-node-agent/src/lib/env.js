@@ -4,6 +4,9 @@ const requiredEnvs = [
     "NODE_ID",
     "NODE_SECRET",
     "NODE_MANAGER_URL",
+    "REDIS_HOST",
+    "REDIS_PORT",
+    "REDIS_PASSWORD"
 ];
 for (const key of requiredEnvs) {
     if (!process.env[key]) {
@@ -18,4 +21,7 @@ export const envs = {
     NODE_ID: process.env.NODE_ID,
     NODE_SECRET: process.env.NODE_SECRET,
     NODE_MANAGER_URL: process.env.NODE_MANAGER_URL,
+    REDIS_HOST: process.env.REDIS_HOST,
+    REDIS_PORT: process.env.REDIS_PORT,
+    REDIS_PASSWORD: process.env.REDIS_PASSWORD,
 }
