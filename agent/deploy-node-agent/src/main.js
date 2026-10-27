@@ -6,6 +6,11 @@ import { envs } from "./lib/env.js";
 
 const app = buildApp();
 
+
+// jobs shedule
+import './jobs/nodeverification.jobs.js'
+
+
 async function start() {
     try {
 
