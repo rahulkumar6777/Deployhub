@@ -4,6 +4,11 @@ const app = await buildApp();
 
 
 
+// jobs shedule
+import './jobs/nodeverification.jobs.js'
+
+
+console.log(process.env.NODE_MANAGER_URL)
 
 const start = async (port) => {
     app.listen(port, () => {

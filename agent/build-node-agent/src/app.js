@@ -1,6 +1,11 @@
 import express from 'express';
 
 
+// load env
+import dotenv from 'dotenv';
+dotenv.config();
+
+
 export const buildApp = async () => {
 
     const app = express();
