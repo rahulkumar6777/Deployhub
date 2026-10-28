@@ -14,7 +14,8 @@ import './jobs/nodeverification.jobs.js'
 async function start() {
     try {
 
-        process.env.IS_NODEMANAGER_READY === "true" ? await nodeVerify() : process.exit(1)
+        await nodeVerify();
+        await connectRedis();
         app.listen({
             host: "127.0.0.1",
             port: envs.PORT,
