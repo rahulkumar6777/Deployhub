@@ -12,6 +12,7 @@ import './jobs/nodeverification.jobs.js'
 const start = async (port) => {
 
     await nodeVerify();
+    await connectRedis()
     app.listen(port, () => {
         console.log(`server is running on port ${port}`)
     })
