@@ -4,6 +4,7 @@ const requiredEnvs = [
     "NODE_ID",
     "NODE_SECRET",
     "NODE_MANAGER_URL",
+    "RABBIT_MQ_URL",
 ];
 for (const key of requiredEnvs) {
     if (!process.env[key]) {
@@ -18,4 +19,5 @@ export const envs = {
     NODE_ID: process.env.NODE_ID,
     NODE_SECRET: process.env.NODE_SECRET,
     NODE_MANAGER_URL: process.env.NODE_MANAGER_URL,
+    RABBIT_MQ_URL: process.env.RABBIT_MQ_URL
 }
