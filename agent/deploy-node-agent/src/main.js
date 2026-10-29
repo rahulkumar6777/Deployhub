@@ -2,6 +2,8 @@
 import { buildApp } from "./app.js";
 import { nodeVerify } from "./config/nodeVerify.js";
 import { envs } from "./lib/env.js";
+import { connectRedis } from "./config/redis.js";
+import { connectRabbitMQ } from "./config/rabbitmq.js";
 
 
 const app = buildApp();
@@ -16,6 +18,7 @@ async function start() {
 
         await nodeVerify();
         await connectRedis();
+        await connectRabbitMQ()
         app.listen({
             host: "127.0.0.1",
             port: envs.PORT,
