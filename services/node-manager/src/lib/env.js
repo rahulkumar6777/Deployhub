@@ -9,7 +9,10 @@ const requiredEnvs = [
     "REDIS_HOST",
     "REDIS_PORT",
     "REDIS_PASSWORD",
+    "RABBIT_MQ_URL",
 ];
+
+
 for (const key of requiredEnvs) {
     if (!process.env[key]) {
         throw new Error(`Missing Env: ${key}`);
@@ -24,4 +27,5 @@ export const envs = {
     REDIS_HOST: process.env.REDIS_HOST,
     REDIS_PORT: process.env.REDIS_PORT,
     REDIS_PASSWORD: process.env.REDIS_PASSWORD,
+    RABBIT_MQ_URL: process.env.RABBIT_MQ_URL
 }
