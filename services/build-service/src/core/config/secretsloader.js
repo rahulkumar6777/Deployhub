@@ -1,5 +1,5 @@
 import dotenv from 'dotenv';
-import { print as logger } from '../../../../shared/utils/print.js';
+import { print as logger } from '../../../../../shared/utils/print.js';
 import { loadSecretsFromManager } from '../../../../../shared/secrets/loadSecrets.js';
 
 dotenv.config();
