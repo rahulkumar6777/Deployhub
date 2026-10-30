@@ -1,6 +1,4 @@
 import express from "express";
-import helmet from "helmet";
-import hpp from "hpp";
 import { buildEnv } from "./lib/env.js";
 import { connectDb, closeDb } from "./core/db/mongo.js";
 import { connectRedis } from "./core/redis/client.js";
