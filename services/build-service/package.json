@@ -1,0 +1,29 @@
+{
+  "name": "build-service",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "@domaindrop/node": "^0.3.0",
+    "amqplib": "^2.2.0",
+    "archiver": "^8.0.0",
+    "axios": "^1.21.0",
+    "bullmq": "^6.5.2",
+    "dotenv": "^18.0.9",
+    "express": "^5.3.0",
+    "express-validator": "^7.3.2",
+    "helmet": "^8.3.0",
+    "hpp": "^0.2.3",
+    "ioredis": "^6.0.0",
+    "mongoose": "^9.11.4",
+    "tar": "^7.5.22",
+    "tar-fs": "^3.1.3"
+  }
+}
