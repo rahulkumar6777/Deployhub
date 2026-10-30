@@ -157,52 +157,6 @@ export const getNodebyRegionCodeValidator = [
         .withMessage('Region code must be a string')
 ];
 
-export const suggestNodeValidator = [
-    body("nodeType")
-        .trim()
-        .notEmpty()
-        .withMessage("Node type is required")
-        .isIn(["build", "deploy"])
-        .withMessage("Node type must be build or deploy"),
-
-    body("cpuPercent")
-        .if((value, { req }) => req.body.nodeType === "deploy")
-        .notEmpty()
-        .withMessage("CPU requirement is required")
-        .isFloat({ min: 0 })
-        .withMessage("CPU requirement must be a positive number")
-        .toFloat(),
-
-    body("memoryBytes")
-        .if((value, { req }) => req.body.nodeType === "deploy")
-        .notEmpty()
-        .withMessage("Memory requirement in bytes is required")
-        .isInt({ min: 0 })
-        .withMessage("Memory requirement must be a positive number")
-        .toInt(),
-
-    body("storageBytes")
-        .if((value, { req }) => req.body.nodeType === "deploy")
-        .notEmpty()
-        .withMessage("Storage requirement in bytes is required")
-        .isInt({ min: 0 })
-        .withMessage("Storage requirement must be a positive number")
-        .toInt()
-];
-
-export const confirmNodeAllocationValidator = [
-    param("allocationId")
-        .trim()
-        .notEmpty()
-        .withMessage("Allocation ID is required")
-        .isMongoId()
-        .withMessage("Allocation ID must be a valid MongoDB ObjectId"),
-
-    body("success")
-        .isBoolean()
-        .withMessage("Success must be true or false")
-        .toBoolean()
-];
 
 
 export const getNodeByIdValidator = [
