@@ -71,6 +71,19 @@ export const getSecretsForService = async (serviceName) => {
             DOCKER_PASSWORD: env.DOCKER_PASSWORD,
             GITHUB_WEBHOOK_SECRET: env.GITHUB_WEBHOOK_SECRET
         },
+        'build-service': {
+            NODE_ENV: env.NODE_ENV,
+            PORT: env.BUILD_SERVICE_PORT,
+            MONGODB_URI: env.BUILD_SERVICE_MONGODB_URI,
+            REDIS_HOST: env.REDIS_HOST,
+            REDIS_PORT: env.REDIS_PORT,
+            REDIS_PASSWORD: env.REDIS_PASSWORD,
+            RABBITMQ_URL: env.RABBITMQ_URL,
+            INTERNAL_SECRET: env.INTERNAL_SECRET,
+            INTERNAL_SERVICE_TALKING_SECRET: env.INTERNAL_SERVICE_TALKING_SECRET,
+            PROJECT_SERVICE_URL: env.PROJECT_SERVICE_URL,
+            IDENTITY_SERVICE_URL: env.IDENTITY_SERVICE_URL,
+        }
     }
 
     return registry[serviceName] ?? null;
