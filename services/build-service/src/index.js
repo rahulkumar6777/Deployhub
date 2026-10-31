@@ -46,6 +46,12 @@ app.use(userContext);
 
 
 
+//router
+import buildRoutes from './routes/build.router.js';
+app.use('/', buildRoutes);
+
+
+
 export default async function startApp(port, service_name) {
     await connectDb();
     await connectRabbitMQ();
