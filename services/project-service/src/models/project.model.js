@@ -5,10 +5,10 @@ export const Project_Status = Object.freeze([
     "draft",
     "queued",
     "building",
+    "build-failed",
     "deploying",
+    "deploy-failed",
     "running",
-    "failed",
-    "stopped",
     "crash",
     "deleted"
 ])
