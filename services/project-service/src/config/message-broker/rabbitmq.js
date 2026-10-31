@@ -74,3 +74,17 @@ export const closeRabbitMQ = async () => {
         console.error("RabbitMQ close error:", err.message);
     }
 };
+
+export const publishGlobal = (data) => {
+    const channel = getChannel();
+
+    return channel.sendToQueue(
+        QUEUE_NAMES.GLOBAL,
+        Buffer.from(JSON.stringify(data)),
+        {
+            persistent: true,
+            contentType: "application/json",
+            timestamp: Date.now(),
+        }
+    );
+};
