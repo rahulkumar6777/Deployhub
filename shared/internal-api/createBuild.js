@@ -1,4 +1,4 @@
-export const createBuildExternalApiCall = async (axios, buildServiceUrl, internalServiceSecret, microservicetalkingsecret, data) => {
+export const createBuildInternalApiCall = async (axios, buildServiceUrl, internalServiceSecret, microservicetalkingsecret, data) => {
     try {
         const response = await axios.post(`${buildServiceUrl}/internal/builds`,
             data,
