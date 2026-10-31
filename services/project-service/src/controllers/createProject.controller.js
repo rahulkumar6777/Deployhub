@@ -7,7 +7,8 @@ import axios from 'axios';
 import { env } from '../lib/env.js';
 import { publishGlobal } from '../config/message-broker/rabbitmq.js';
 import { Project } from '../models/project.model.js';
-
+import { publishProjectStatus } from '../../../../shared/utils/publishProjectStatus.js'
+import { getRedis } from '../core/redis/client.js';
 
 
 export const createProject = async (req, res) => {
@@ -46,12 +47,15 @@ export const createProject = async (req, res) => {
                 message: "Build creation failed"
             })
         }
-        
+
         await publishGlobal({
             event: "BUILD_REQUESTED",
             buildId,
             ...data
         });
+
+        const redisclient = getRedis();
+        await publishProjectStatus(redisclient, { projectId: project._id, status: 'queued' });
 
         return res.status(201).json({
             success: true,
