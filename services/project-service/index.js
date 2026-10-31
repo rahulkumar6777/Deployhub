@@ -50,6 +50,7 @@ app.use(createInternalAUthMiddleware({
 
 
 import userContext from '../../shared/middlewares/userContext.js';
+import { connectRabbitMQ } from "./src/config/message-broker/rabbitmq.js";
 app.use(userContext);
 
 
@@ -67,6 +68,9 @@ export default async function startApp(port) {
 
     await connectRedis();
     await connectDb();
+    await connectRabbitMQ();
+
+    
     const server = app.listen(port, () => {
         print.log(`Project server running on port ${port}`);
     });
