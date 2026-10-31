@@ -8,7 +8,7 @@ export const connectDb = async () => {
         await mongoose.connect(env.MONGODB_URI, {
             maxPoolSize: 20,
             minPoolSize: 10,
-            serverSelectionTimeoutMS: 5000,
+            serverSelectionTimeoutMS: 10000,
         });
 
         console.log("MongoDB Connected");

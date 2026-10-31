@@ -1,6 +1,6 @@
 import { createProject } from "../controllers/createProject.controller.js";
 import express from "express";
-import { createProjectValidator, paymentInitValidator, paymentVerifyValidator } from "../validators/createProject.validators";
+import { createProjectValidator, paymentInitValidator, paymentVerifyValidator } from "../validators/createProject.validators.js";
 import { paymentInitController, paymentVerifyController } from "../controllers/payment.controller.js";
 
 

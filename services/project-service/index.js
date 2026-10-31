@@ -4,6 +4,8 @@ import { createInternalAUthMiddleware } from "../../shared/middlewares/internalA
 import { createShutdownHandler } from "../../shared/utils/gracefulShutdown.js";
 import { env } from "./src/lib/env.js";
 import { connectRedis, closeRedis } from "./src/core/redis/client.js";
+import { connectRabbitMQ } from "./src/config/message-broker/rabbitmq.js";
+
 
 const app = express();
 
@@ -50,9 +52,11 @@ app.use(createInternalAUthMiddleware({
 
 
 import userContext from '../../shared/middlewares/userContext.js';
-import { connectRabbitMQ } from "./src/config/message-broker/rabbitmq.js";
 app.use(userContext);
 
+
+import projectRouter from './src/routes/projectRouter.route.js';
+app.use('/', projectRouter);
 
 app.use((_req, res) => {
     res.status(404).json({ success: false, message: 'Not found' });
@@ -70,7 +74,7 @@ export default async function startApp(port) {
     await connectDb();
     await connectRabbitMQ();
 
-    
+
     const server = app.listen(port, () => {
         print.log(`Project server running on port ${port}`);
     });

@@ -22,6 +22,9 @@ export const createProject = async (req, res) => {
 
         const { project } = await createFreeProject(user._id, req.body);
 
+        // here i call buildapi
+        
+
         return res.status(201).json({
             success: true,
             message: 'Free project created and queued',

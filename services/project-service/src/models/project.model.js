@@ -80,14 +80,7 @@ const projectschema = new mongoose.Schema({
         type: Number,
         default: 3000
     },
-    assignedPort: {
-        type: Number
-    },
     containerId: {
-        type: String,
-        sparse: true
-    },
-    internalUrl: {
         type: String,
         sparse: true
     },
@@ -101,12 +94,13 @@ const projectschema = new mongoose.Schema({
     },
     subdomain: {
         type: String,
-        sparse: true,
         lowercase: true,
         trim: true,
+        unique: true,
         validate: {
             validator: function (value) {
-                return Boolean(value) && /^[a-z0-9]+(-[a-z0-9]+)*$/.test(value);
+                return value == null ||
+                    /^[a-z0-9]+(-[a-z0-9]+)*$/.test(value);
             },
             message: 'Subdomain must use lowercase letters, numbers, and hyphens'
         }
@@ -193,16 +187,6 @@ projectschema.index(
     }
 );
 
-projectschema.index(
-    { subdomain: 1 },
-    {
-        unique: true,
-        partialFilterExpression: {
-            isMicroservice: false,
-            subdomain: { $exists: true }
-        }
-    }
-);
 projectschema.index({ userId: 1, paymentStatus: 1, createdAt: -1 });
 
 

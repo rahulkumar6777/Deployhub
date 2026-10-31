@@ -1,19 +1,13 @@
 import axios from 'axios';
 import crypto, { randomUUID } from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
-import { getUserNetworkName } from '../../../../shared/utils/getUserNetworkName.js';
 import { AppError } from '../../../../shared/errors/AppError.js';
 import { plans } from '../../../../shared/constants/plan.js';
-import { allocatePort } from '../../../../shared/utils/allocatePort.js';
-import { QUEUE_NAMES } from '../../../../shared/queues/queueNames.js';
-import { publishProjectStatus } from '../../../../shared/utils/publishProjectStatus.js';
-import { project_env } from '../lib/env.js';
+import { env } from '../lib/env.js';
 import { getRedis } from '../core/redis/client.js';
 import { Project } from '../models/project.model.js';
 import { PendingOrder } from '../models/PendingOrder.js';
 import { CompletedOrder } from '../models/completedOrder.model.js';
-import { Port } from '../models/port.model.js';
-import { buildQueue, subdomainChangeQueue } from '../utils/queues.js';
 
 
 const PAID_PLANS = Object.keys(plans).filter(
@@ -219,10 +213,10 @@ const createRazorpayOrder = async ({
         {
             auth: {
                 username:
-                    project_env.RAZORPAY_KEY_ID,
+                    env.RAZORPAY_KEY_ID,
 
                 password:
-                    project_env.RAZORPAY_KEY_SECRET
+                    env.RAZORPAY_KEY_SECRET
             },
 
             timeout: 10000
@@ -241,7 +235,7 @@ const verifyRazorpaySignature = ({
     const expectedSignature = crypto
         .createHmac(
             'sha256',
-            project_env.RAZORPAY_KEY_SECRET
+            env.RAZORPAY_KEY_SECRET
         )
         .update(
             `${orderId}|${paymentId}`
@@ -279,28 +273,6 @@ const planAmountInPaise = (
 };
 
 
-const queueProjectBuild = async (
-    project
-) => {
-    await buildQueue.add(
-        QUEUE_NAMES.BUILD,
-        {
-            projectId:
-                project._id,
-
-            plan:
-                project.plan,
-
-            userId:
-                project.userId,
-
-            firstTime:
-                true
-        }
-    );
-};
-
-
 export const createProjectForPlan = async (
     userId,
     body,
@@ -322,16 +294,6 @@ export const createProjectForPlan = async (
 
 
     const redisclient = getRedis();
-
-
-    const networkName =
-        await getUserNetworkName(
-            axios,
-            project_env.IDENTITY_SERVICE_URL,
-            userId,
-            project_env.INTERNAL_SERVICE_TALKING_SECRET,
-            project_env.INTERNAL_SECRET
-        );
 
 
     const now = new Date();
@@ -367,7 +329,6 @@ export const createProjectForPlan = async (
         port:
             normalized.port,
 
-        networkName,
 
         subdomain:
             normalized.subdomain,
@@ -426,17 +387,6 @@ export const createProjectForPlan = async (
     });
 
 
-    const assignedPort =
-        await allocatePort(
-            redisclient,
-            project._id,
-            Port
-        );
-
-
-    project.assignedPort =
-        assignedPort;
-
     project.dockerContainerName =
         dockerContainerName(
             project._id
@@ -447,25 +397,6 @@ export const createProjectForPlan = async (
         validateBeforeSave: false
     });
 
-    await redisclient.hset(
-        `deployhub:users:subdomain:${normalized.subdomain}`,
-        {
-            port:
-                assignedPort,
-
-            projectId:
-                project._id.toString(),
-
-            plan:
-                project.plan
-        }
-    );
-
-
-    await queueProjectBuild(
-        project
-    );
-
 
     await publishProjectStatus(
         redisclient,
@@ -475,31 +406,6 @@ export const createProjectForPlan = async (
 
             status:
                 'queued'
-        }
-    );
-
-
-
-    await subdomainChangeQueue.add(
-        'subdomain-change',
-        {
-            projectId:
-                project._id,
-
-            userId:
-                project.userId,
-
-            oldSubdomain:
-                null,
-
-            newSubdomain:
-                project.subdomain,
-
-            projectType:
-                project.type,
-
-            assignedPort:
-                project.assignedPort
         }
     );
 
