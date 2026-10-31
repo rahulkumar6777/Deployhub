@@ -69,7 +69,8 @@ export const getSecretsForService = async (serviceName) => {
             BUILD_SERVICE_URL: env.BUILD_SERVICE_URL,
             DOCKER_USERNAME: env.DOCKER_USERNAME,
             DOCKER_PASSWORD: env.DOCKER_PASSWORD,
-            GITHUB_WEBHOOK_SECRET: env.GITHUB_WEBHOOK_SECRET
+            GITHUB_WEBHOOK_SECRET: env.GITHUB_WEBHOOK_SECRET,
+            RABBITMQ_URL: env.RABBITMQ_URL,
         },
         'build-service': {
             NODE_ENV: env.NODE_ENV,
