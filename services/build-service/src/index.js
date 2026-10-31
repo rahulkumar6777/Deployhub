@@ -39,6 +39,10 @@ app.use(createInternalAUthMiddleware({
 }));
 
 
+// ye api internal communication ke liye
+import internalRouter from './src/routes/internal.routes.js';
+app.use('/internal', internalRouter);
+
 
 // ye user chec kakrne ke liye hai means agar user routes pe req ja raha hai jab req.user hona chiaye
 import userContext from "../../../shared/middlewares/userContext.js";
