@@ -40,6 +40,7 @@ const normalizeSubdomain = (subdomain) => {
 
 const normalizeProjectBody = (body) => {
     const projectType = getProjectType(body);
+    const isStatic = projectType === 'static';
 
     return {
         projectName:
@@ -74,7 +75,7 @@ const normalizeProjectBody = (body) => {
             body.startCommand,
 
         port:
-            Number(body.port),
+            isStatic ? undefined : Number(body.port),
 
         subdomain:
             normalizeSubdomain(body.subdomain),
@@ -324,8 +325,7 @@ export const createProjectForPlan = async (
         startCommand:
             normalized.startCommand,
 
-        port:
-            normalized.port,
+        ...(normalized.projectType !== 'static' && { port: normalized.port }),
 
 
         subdomain:
