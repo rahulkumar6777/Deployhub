@@ -1,12 +1,17 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useContext } from 'react'
+import { createContext, useCallback, useContext, useState } from 'react'
 
 const Workspace = createContext(null)
 
-// Workspace data is intentionally local until dashboard APIs are added.
+// Keep projects created during the current app session visible in the workspace.
 export function WorkspaceProvider({ children }) {
+  const [projects, setProjects] = useState([])
+  const addProject = useCallback((project) => {
+    if (!project) return
+    setProjects((current) => [project, ...current.filter((item) => item._id !== project._id)])
+  }, [])
   const value = {
-    projects: [],
+    projects,
     builds: [],
     data: [],
     loading: false,
@@ -16,6 +21,7 @@ export function WorkspaceProvider({ children }) {
     reload: () => {},
     reloadBuilds: () => {},
     updateData: () => {},
+    addProject,
   }
 
   return <Workspace.Provider value={value}>{children}</Workspace.Provider>

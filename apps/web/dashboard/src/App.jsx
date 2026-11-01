@@ -6,6 +6,7 @@ import { LoadState } from './components/ui'
 import { Dashboard, Projects, WorkspaceAnalytics, WorkspaceBilling } from './pages/Workspace'
 import Auth from './pages/Auth'
 import Sessions from './pages/Sessions'
+import NewProject from './pages/NewProject'
 
 function Protected() {
   const { isAuthenticated, isAuthReady } = useAuth()
@@ -31,6 +32,7 @@ export default function App() {
         <Route element={<Shell />}>
           <Route index element={<Dashboard />} />
           <Route path="projects" element={<Projects />} />
+          <Route path="projects/new" element={<NewProject />} />
           <Route path="analytics" element={<WorkspaceAnalytics />} />
           <Route path="billing" element={<WorkspaceBilling />} />
           <Route path="settings/sessions" element={<Sessions />} />
