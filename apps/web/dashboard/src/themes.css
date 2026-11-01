@@ -762,6 +762,8 @@ textarea:focus-visible {
 .project-plan-features { margin-top: auto; padding-top: 12px; color: var(--theme-muted); font-size: 9px; line-height: 1.55; }
 .project-field { display: grid; align-content: start; gap: 7px; min-width: 0; }
 .project-field > span { color: var(--theme-text); font-size: 11px; font-weight: 550; }
+.project-field > span:has(svg) { display: inline-flex; align-items: center; gap: 6px; }
+.project-field > span svg { color: var(--theme-muted); }
 .project-field > span small { margin-left: 5px; color: var(--theme-muted); font-size: 9px; font-weight: 400; }
 .project-field input,
 .project-field select,
@@ -789,6 +791,14 @@ textarea:focus-visible {
 .project-term-field { grid-template-columns: auto minmax(130px, 220px) 1fr; align-items: center; gap: 12px; margin-top: 15px; }
 .project-term-field > span { font-size: 10px; }
 .project-term-field > small { color: var(--theme-muted); font-size: 10px; }
+.github-repository-search { position: relative; display: flex; align-items: center; }
+.github-repository-search > svg { position: absolute; left: 10px; color: var(--theme-muted); }
+.github-repository-search input { padding-left: 31px; }
+.github-repository-hint,
+.github-repository-error { display: flex; align-items: center; gap: 6px; color: var(--theme-muted); font-size: 10px; line-height: 1.5; }
+.github-repository-error { color: var(--theme-danger); }
+.github-repository-action { justify-self: start; padding: 2px 0; border: 0; color: var(--theme-accent); background: transparent; cursor: pointer; font: 550 10px 'DM Sans', sans-serif; text-align: left; }
+.github-repository-action:hover { text-decoration: underline; }
 .project-form-error { display: flex; align-items: center; gap: 9px; padding: 12px 14px; border: 1px solid color-mix(in srgb, var(--theme-danger) 33%, var(--theme-line)); border-radius: 9px; color: var(--theme-danger); background: var(--theme-danger-bg); font-size: 11px; }
 .project-form-error svg { flex: 0 0 auto; }
 .project-payment-note { display: flex; align-items: center; gap: 10px; color: var(--theme-muted); font-size: 10px; }

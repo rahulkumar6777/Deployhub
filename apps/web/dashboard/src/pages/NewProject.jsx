@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useState } from 'react'
-import { ArrowLeft, ArrowRight, Check, CircleAlert, CreditCard, LoaderCircle, Rocket, Sparkles } from 'lucide-react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { ArrowLeft, ArrowRight, Check, CircleAlert, CreditCard, LoaderCircle, Rocket, Search, Sparkles } from 'lucide-react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { api } from '../api/apiclient'
+import Github from '../components/Github'
 import { PageHeader } from '../components/ui'
 import { useAuth } from '../context/AuthContext'
 import { useWorkspace } from '../context/WorkspaceContext'
@@ -116,20 +117,63 @@ export default function NewProject() {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
   const [created, setCreated] = useState(null)
+  const [repositories, setRepositories] = useState([])
+  const [repositoriesLoading, setRepositoriesLoading] = useState(false)
+  const [repositoriesError, setRepositoriesError] = useState('')
+  const [repositoryQuery, setRepositoryQuery] = useState('')
+  const [manualRepository, setManualRepository] = useState(false)
   const [razorpayReady, setRazorpayReady] = useState(Boolean(window.Razorpay))
   const razorpayKey = import.meta.env.VITE_RAZORPAY_KEY_ID
+  const isGithubUser = user?.provider?.toLowerCase() === 'github'
   const isStatic = projectType === 'static'
   const paid = plan !== 'free'
   const supportedPlans = useMemo(
     () => Object.entries(PLANS).filter(([, item]) => item.types.includes(projectType)),
     [projectType],
   )
+  const filteredRepositories = useMemo(() => {
+    const query = repositoryQuery.trim().toLowerCase()
+    if (!query) return repositories
+    return repositories.filter((repository) =>
+      `${repository.full_name} ${repository.description || ''}`.toLowerCase().includes(query),
+    )
+  }, [repositories, repositoryQuery])
+
+  const fetchRepositories = useCallback(async () => {
+    if (!isGithubUser) return
+    setRepositoriesLoading(true)
+    setRepositoriesError('')
+    try {
+      const { data } = await api.get('/auth/user/repos')
+      setRepositories(Array.isArray(data?.repositories) ? data.repositories : [])
+    } catch (err) {
+      setRepositoriesError(err.response?.data?.message || 'Could not load your GitHub repositories.')
+    } finally {
+      setRepositoriesLoading(false)
+    }
+  }, [isGithubUser])
+
+  useEffect(() => {
+    if (isGithubUser) fetchRepositories()
+  }, [fetchRepositories, isGithubUser])
 
   useEffect(() => {
     if (paid && razorpayKey) {
       loadRazorpay().then(() => setRazorpayReady(true)).catch(() => setRazorpayReady(false))
     }
   }, [paid, razorpayKey])
+
+  function selectRepository(url) {
+    const repository = repositories.find((item) => item.html_url === url)
+    setForm((current) => ({
+      ...current,
+      repoUrl: repository?.html_url || '',
+      branch: repository?.default_branch || current.branch || 'main',
+      ...(repository && !current.projectName ? { projectName: repository.name, subdomain: slugify(repository.name) } : {}),
+    }))
+    setSubdomainEdited(false)
+    setError('')
+  }
 
   function changeType(nextType) {
     setProjectType(nextType)
@@ -325,10 +369,59 @@ export default function NewProject() {
                 {VERSIONS[projectType].map((version) => <option key={version} value={version}>{version}</option>)}
               </select>
             </label>
-            <label className="project-field">
-              <span>Git repository URL</span>
-              <input value={form.repoUrl} onChange={(event) => changeField('repoUrl', event.target.value)} placeholder="https://github.com/you/repository" type="url" required />
-            </label>
+            {isGithubUser && !manualRepository ? (
+              <div className="project-field github-repository-field">
+                <span><Github size={14} /> GitHub repository</span>
+                {repositories.length > 8 && (
+                  <div className="github-repository-search">
+                    <Search size={14} />
+                    <input
+                      aria-label="Search repositories"
+                      value={repositoryQuery}
+                      onChange={(event) => setRepositoryQuery(event.target.value)}
+                      placeholder="Search your repositories"
+                    />
+                  </div>
+                )}
+                <select
+                  value={form.repoUrl}
+                  onChange={(event) => selectRepository(event.target.value)}
+                  disabled={repositoriesLoading || !repositories.length}
+                  required
+                >
+                  <option value="">
+                    {repositoriesLoading ? 'Loading your repositories…' : 'Choose a repository'}
+                  </option>
+                  {filteredRepositories.map((repository) => (
+                    <option key={repository.id} value={repository.html_url}>
+                      {repository.full_name}{repository.private ? ' · Private' : ''}
+                    </option>
+                  ))}
+                </select>
+                {repositoriesLoading && <small className="github-repository-hint"><LoaderCircle size={13} className="spin" />Fetching repositories from GitHub…</small>}
+                {!repositoriesLoading && repositoriesError && (
+                  <small className="github-repository-error">{repositoriesError}</small>
+                )}
+                {!repositoriesLoading && !repositoriesError && repositories.length === 0 && (
+                  <small className="github-repository-hint">No repositories were found for this GitHub account.</small>
+                )}
+                {(repositoriesError || repositories.length === 0) && !repositoriesLoading && (
+                  <button type="button" className="github-repository-action" onClick={() => setManualRepository(true)}>
+                    Enter a repository URL manually
+                  </button>
+                )}
+              </div>
+            ) : (
+              <label className="project-field">
+                <span>{isGithubUser ? 'Repository URL' : 'Git repository URL'}</span>
+                <input value={form.repoUrl} onChange={(event) => changeField('repoUrl', event.target.value)} placeholder="https://github.com/you/repository" type="url" required />
+                {isGithubUser && repositories.length > 0 && (
+                  <button type="button" className="github-repository-action" onClick={() => setManualRepository(false)}>
+                    Choose from my GitHub repositories
+                  </button>
+                )}
+              </label>
+            )}
             <label className="project-field">
               <span>Branch</span>
               <input value={form.branch} onChange={(event) => changeField('branch', event.target.value)} placeholder="main" required />

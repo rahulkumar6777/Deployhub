@@ -31,6 +31,7 @@ export const AuthProvider = ({ children }) => {
   const [isAuthReady, setIsAuthReady] = useState(false)
 
   const accessTokenRef = useRef(null)
+  const userRef = useRef(null)
   const isLoggingOut = useRef(false)
   const navigate = useNavigate()
 
@@ -39,22 +40,31 @@ export const AuthProvider = ({ children }) => {
     setAccessToken(token)
   }, [])
 
+  const setCachedUser = useCallback((userData) => {
+    const normalized = normalizeUser(userData)
+    userRef.current = normalized
+    setUser(normalized)
+    return normalized
+  }, [])
+
   const clearAuth = useCallback(() => {
     setToken(null)
-    setUser(null)
-  }, [setToken])
+    setCachedUser(null)
+  }, [setCachedUser, setToken])
 
-  const fetchUser = useCallback(async ({ skipAuthRefresh = false } = {}) => {
+  const fetchUser = useCallback(async ({ skipAuthRefresh = false, force = false } = {}) => {
+    if (userRef.current && !force) return userRef.current
+
     try {
       const res = await api.get('/auth/user/me', { skipAuthRefresh })
       const profile = res.data?.userData || res.data?.data || res.data?.user || null
-      setUser(normalizeUser(profile))
+      setCachedUser(profile)
       return profile
     } catch {
-      setUser(null)
+      setCachedUser(null)
       return null
     }
-  }, [])
+  }, [setCachedUser])
 
   const refreshAccessToken = useCallback(async () => {
     try {
@@ -64,7 +74,9 @@ export const AuthProvider = ({ children }) => {
       if (!token) throw new Error('No token returned')
 
       setToken(token)
-      const profile = await fetchUser({ skipAuthRefresh: true })
+      // `/me` is cached for the lifetime of the auth context; token rotation
+      // should not make every page reload the same profile.
+      const profile = userRef.current || await fetchUser({ skipAuthRefresh: true })
       if (!profile) {
         clearAuth()
         return null
@@ -130,7 +142,7 @@ export const AuthProvider = ({ children }) => {
     if (!token) throw new Error('Login failed')
 
     setToken(token)
-    const profile = await fetchUser()
+    const profile = await fetchUser({ force: true })
     if (!profile) {
       clearAuth()
       throw new Error('Could not load user profile')
