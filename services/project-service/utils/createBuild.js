@@ -3,9 +3,9 @@ import { createBuildInternalApiCall } from "../../../shared/internal-api/createB
 import { env } from "../src/lib/env.js";
 
 export const createBuild = async (data, Project) => {
-    const buildId = await createBuildInternalApiCall(axios, env.BUILD_SERVICE_URL, env.INTERNAL_SECRET, env.INTERNAL_SERVICE_TALKING_SECRET, data);
+    const buildData = await createBuildInternalApiCall(axios, env.BUILD_SERVICE_URL, env.INTERNAL_SECRET, env.INTERNAL_SERVICE_TALKING_SECRET, data);
 
-    if (!buildId) {
+    if (!buildData) {
 
         await Project.findByIdAndDelete(data.projectId);
 
@@ -18,6 +18,6 @@ export const createBuild = async (data, Project) => {
     return {
         success: true,
         message: "build creation successfully",
-        buildId
+        buildId: buildData.data.buildId
     }
 }

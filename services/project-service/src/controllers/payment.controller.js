@@ -5,6 +5,7 @@ import { publishGlobal } from '../config/message-broker/rabbitmq.js';
 import { createBuild } from '../../utils/createBuild.js';
 import { publishProjectStatus } from '../../../../shared/utils/publishProjectStatus.js';
 import { getRedis } from '../core/redis/client.js';
+import { Project } from '../models/project.model.js';
 
 
 
@@ -72,6 +73,15 @@ export const paymentVerifyController = async (req, res) => {
 
         const redisclient = getRedis();
         await publishProjectStatus(redisclient, { projectId: project._id, status: 'queued' });
+
+        await Project.findByIdAndUpdate(
+            project._id,
+            {
+                buildId,
+                $inc: { totalBuilds: 1 }
+            }
+        );
+
 
         return res.status(201).json({
             success: true,
