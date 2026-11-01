@@ -40,7 +40,7 @@ app.use(createInternalAUthMiddleware({
 
 
 // ye api internal communication ke liye
-import internalRouter from './src/routes/internal.routes.js';
+import internalRouter from './routes/internal.Router.js';
 app.use('/internal', internalRouter);
 
 
