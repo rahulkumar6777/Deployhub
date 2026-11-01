@@ -2,9 +2,6 @@ import { validationResult } from 'express-validator';
 import { AppError } from '../../../../shared/errors/AppError.js';
 import { createFreeProject } from '../services/createProject.service.js';
 import { returnError } from '../../../../shared/errors/sendError.js'
-import { createBuildInternalApiCall } from '../../../../shared/internal-api/createBuild.js';
-import axios from 'axios';
-import { env } from '../lib/env.js';
 import { publishGlobal } from '../config/message-broker/rabbitmq.js';
 import { Project } from '../models/project.model.js';
 import { publishProjectStatus } from '../../../../shared/utils/publishProjectStatus.js'
