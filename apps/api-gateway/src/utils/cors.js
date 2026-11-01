@@ -12,7 +12,7 @@ export const corsOption = {
         error.status = 403;
         return callback(error);
     },
-    methods: ['GET', 'POST', 'OPTIONS'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     credentials: true,
     allowedHeaders: ['Content-Type', 'Authorization'],
     exposedHeaders: ['X-Trace-Id', 'Retry-After'],
