@@ -113,8 +113,17 @@ const PROJECT_POLICIES = Object.freeze({
     'GET /health': [
         policy('project:health:ip', 60, 60, (req) => `ip:${clientIp(req)}`),
     ],
-    'POST /projects': [
+    'POST /': [
         policy('project:create:ip', 60 * 60, 4, (req) => `ip:${clientIp(req)}`),
+    ],
+    'GET /': [
+        policy('project:get:ip', 60 * 60, (req) => `ip:${clientIp(req)}`),
+    ],
+    'POST /payment/init': [
+        policy('project:payment:init:ip', 60 * 60, 10, (req) => `ip:${clientIp(req)}`),
+    ],
+    'GET /payment/verify': [
+        policy('project:payment:verify:ip', 60 * 60, 10, (req) => `ip:${clientIp(req)}`),
     ]
 });
 
