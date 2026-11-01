@@ -77,8 +77,7 @@ const projectschema = new mongoose.Schema({
         type: String
     },
     port: {
-        type: Number,
-        default: 3000
+        type: Number
     },
     containerId: {
         type: String,
