@@ -53,6 +53,15 @@ export const createProject = async (req, res) => {
         const redisclient = getRedis();
         await publishProjectStatus(redisclient, { projectId: project._id, status: 'queued' });
 
+
+        await Project.findByIdAndUpdate(
+            project._id,
+            {
+                buildId,
+                $inc: { totalBuilds: 1 }
+            }
+        );
+
         return res.status(201).json({
             success: true,
             message: 'Free project created and queued',
