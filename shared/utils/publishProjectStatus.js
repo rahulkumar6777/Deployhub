@@ -1,4 +1,4 @@
-import { cacheKey } from "../cache/cacheKey";
+import { cacheKey } from "../cache/cacheKey.js";
 
 export const publishProjectStatus = async (redis, payload) => {
 

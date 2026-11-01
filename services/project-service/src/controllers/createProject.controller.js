@@ -9,6 +9,7 @@ import { publishGlobal } from '../config/message-broker/rabbitmq.js';
 import { Project } from '../models/project.model.js';
 import { publishProjectStatus } from '../../../../shared/utils/publishProjectStatus.js'
 import { getRedis } from '../core/redis/client.js';
+import { createBuild } from '../../utils/createBuild.js';
 
 
 export const createProject = async (req, res) => {
@@ -36,15 +37,11 @@ export const createProject = async (req, res) => {
             projectName: project.name
         }
         // here i call buildapi
-        const buildId = await createBuildInternalApiCall(axios, env.BUILD_SERVICE_URL, env.INTERNAL_SECRET, env.INTERNAL_SERVICE_TALKING_SECRET, data);
-
-        if (!buildId) {
-
-            await Project.findByIdAndDelete(project._id);
-
-            return res.status(500).json({
-                success: false,
-                message: "Build creation failed"
+        const { success, buildId, messsage } = await createBuild(data, Project);
+        if (!success === false) {
+            return res.status(200).json({
+                success,
+                messsage
             })
         }
 
