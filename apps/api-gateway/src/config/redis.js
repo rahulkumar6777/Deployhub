@@ -1,37 +1,47 @@
-import Redis from 'ioredis';
-import { ENV } from '../lib/env.js';
-import { createRedisClient } from '../../../../shared/redis/createRedisClient.js';
+import Redis from "ioredis";
+import { createRedisClient } from "../../../../shared/redis/createRedisClient.js";
+import { ENV } from "../lib/env.js";
 
 let redis;
 
 export const connectRedis = async () => {
-
     redis = createRedisClient({
         Redis,
         logger: console,
         options: {
-        host: ENV.REDIS_HOST,
-        port: ENV.REDIS_PORT,
-        password: ENV.REDIS_PASSWORD,
-        ...(ENV.REDIS_TLS ? { tls: {} } : {}),
-        maxRetriesPerRequest: 3,
-        enableReadyCheck: true,
-        lazyConnect: true
-        }
-    })
+            host: ENV.REDIS_HOST,
+            port: ENV.REDIS_PORT,
+            password: ENV.REDIS_PASSWORD,
+            maxRetriesPerRequest: 3,
+            enableReadyCheck: true,
+            lazyConnect: true,
+            keepAlive: 10000,
+            connectTimeout: 10000,
+            retryStrategy: (times) => Math.min(times * 500, 5000),
+        },
+    });
 
-    await redis.connect();
+
+    redis.on("error", (err) => console.error("Redis error:", err.message));
+
+    try {
+        await redis.connect();
+    } catch (err) {
+        console.error("Redis initial connect failed:", err.message);
+    }
+
     return redis;
-}
+};
 
 export const getRedis = () => {
 
     if (!redis) {
         throw new Error('Redis not Initialised')
     }
-
     return redis;
-}
+
+};
+
 
 export const closeRedis = async () => {
     const client = redis;
@@ -44,4 +54,3 @@ export const closeRedis = async () => {
         client.disconnect();
     }
 }
-

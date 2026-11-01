@@ -5,7 +5,7 @@ import express from 'express';
 import helmet from 'helmet';
 import { print } from '../../shared/utils/print.js';
 import { createShutdownHandler } from '../../shared/utils/gracefulShutdown.js';
-import { connectRedis, closeRedis, getRedis } from './src/config/redis.js';
+import { connectRedis, getRedis, closeRedis } from './src/config/redis.js';
 import { ENV } from './src/lib/env.js';
 import { startHealthCheck } from './src/middlewares/healthCheck.js';
 import { configureRateLimitRedisProvider, ingressRateLimitMiddleware } from './src/middlewares/rateLimit.js';
