@@ -7,17 +7,17 @@ export const createBuild = async (data, Project) => {
 
     if (!buildId) {
 
-        await Project.findByIdAndDelete(project._id);
+        await Project.findByIdAndDelete(data.projectId);
 
         return {
             success: "failed",
-            messsage: "build createtion failed"
+            message: "build createtion failed due to build service is temperarily down, please try again later"
         }
     }
 
     return {
         success: true,
-        messsage: "build creation successfully",
+        message: "build creation successfully",
         buildId
     }
 }

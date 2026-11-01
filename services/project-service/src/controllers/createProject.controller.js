@@ -34,11 +34,12 @@ export const createProject = async (req, res) => {
             projectName: project.name
         }
         // here i call buildapi
-        const { success, buildId, messsage } = await createBuild(data, Project);
+        const { success, buildId, message } = await createBuild(data, Project);
+        
         if (!success === false) {
-            return res.status(200).json({
+            return res.status(400).json({
                 success,
-                messsage
+                message
             })
         }
 

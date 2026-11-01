@@ -8,6 +8,7 @@ import { getRedis } from '../core/redis/client.js';
 import { Project } from '../models/project.model.js';
 import { PendingOrder } from '../models/PendingOrder.js';
 import { CompletedOrder } from '../models/completedOrder.model.js';
+import { publishProjectStatus } from '../../../../shared/utils/publishProjectStatus.js';
 
 
 const PAID_PLANS = Object.keys(plans).filter(
