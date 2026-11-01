@@ -74,7 +74,7 @@ const normalizeProjectBody = (body) => {
             body.startCommand,
 
         port:
-            Number(body.port || 3000),
+            Number(body.port),
 
         subdomain:
             normalizeSubdomain(body.subdomain),
@@ -292,9 +292,6 @@ export const createProjectForPlan = async (
         planName,
         normalized.projectType
     );
-
-
-    const redisclient = getRedis();
 
 
     const now = new Date();
