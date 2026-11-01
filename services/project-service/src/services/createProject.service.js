@@ -399,18 +399,6 @@ export const createProjectForPlan = async (
     });
 
 
-    await publishProjectStatus(
-        redisclient,
-        {
-            projectId:
-                project._id,
-
-            status:
-                'queued'
-        }
-    );
-
-
     return {
         project
     };
