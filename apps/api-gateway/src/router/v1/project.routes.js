@@ -5,6 +5,7 @@ import { enforceProjectAccessPolicy } from '../../middlewares/projectAccessPolic
 import proxy from '../../proxy/proxy.js';
 import { services } from '../../config/services.js';
 import { ENV } from '../../lib/env.js';
+import { authenticateUser } from '../../middlewares/authenticateUser.js';
 
 
 const router = express.Router({ caseSensitive: true, strict: true });
@@ -13,6 +14,9 @@ const router = express.Router({ caseSensitive: true, strict: true });
 router.use(
     '/',
     enforceProjectAccessPolicy,
+    (req, res, next) => req.path === '/health'
+        ? next()
+        : authenticateUser(req, res, next),
     checkHealthMiddleware('Project'),
     projectRateLimitMiddleware,
     proxy(services.Project.url, 'Project-Service', { internalSecret: ENV.INTERNAL_SECRET }),

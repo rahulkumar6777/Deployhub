@@ -139,6 +139,13 @@ export default (
                 proxyReq.setHeader('X-Internal-Secret', internalSecret);
                 proxyReq.setHeader('X-Trace-Id', req.traceId);
 
+                if (req.user?._id && req.user?.tokenId) {
+                    proxyReq.setHeader('X-User-Context', JSON.stringify({
+                        _id: req.user._id,
+                        tokenId: req.user.tokenId,
+                    }));
+                }
+
                 const ip = normalizeIp(req);
                 if (ip) {
                     proxyReq.setHeader('X-Forwarded-For', ip);

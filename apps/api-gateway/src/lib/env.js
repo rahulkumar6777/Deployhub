@@ -76,6 +76,11 @@ if (/[\r\n]/.test(internalSecret)) {
     throw new Error('INTERNAL_SECRET contains invalid control characters');
 }
 
+const accessTokenSecret = required('ACCESS_TOKEN_SECRET');
+if (accessTokenSecret.length < 32 || /[\r\n]/.test(accessTokenSecret)) {
+    throw new Error('ACCESS_TOKEN_SECRET must be at least 32 characters without control characters');
+}
+
 const frontendUri = origin('FRONTEND_URL');
 const adminFrontendUrl = origin('ADMIN_FRONTEND_URL', {
     optional: nodeEnv === 'production',
@@ -106,6 +111,7 @@ export const ENV = Object.freeze({
         PROJECT: httpUrl('PROJECT_SERVICE_URL'),
     }),
     INTERNAL_SECRET: internalSecret,
+    ACCESS_TOKEN_SECRET: accessTokenSecret,
     SERVICE_NAME: 'api-gateway',
     EMAIL_PASS: required('EMAIL_PASS'),
     EMAIL_USER: required('EMAIL_USER'),
