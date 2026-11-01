@@ -45,7 +45,8 @@ export const createProject = async (req, res) => {
         await publishGlobal({
             event: "BUILD_REQUESTED",
             buildId,
-            ...data
+            ...data,
+            firstTime: true
         });
 
         const redisclient = getRedis();
