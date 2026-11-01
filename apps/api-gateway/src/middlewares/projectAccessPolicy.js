@@ -1,7 +1,6 @@
 const PROJECT_PUBLIC_ROUTES = new Map([
     ['/health', new Set(['GET'])],
-    ['/', new Set(['POST'])],
-    ['/', new Set(['GET'])],
+    ['/', new Set(['GET', 'POST'])],
     ['/payment/init', new Set(['POST'])],
     ['/payment/verify', new Set(['POST'])],
 ]);
