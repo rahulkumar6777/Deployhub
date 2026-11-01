@@ -123,7 +123,7 @@ export const refreshTokenService = async ({ refreshToken, ip, userAgent }) => {
 
     await redis
         .multi()
-        .set(createSessionKey(userId, newTokenId), JSON.stringify(newSession), 'EX', SESSION_TTL_SECONDS)
+        .set(cacheKey.createSessionKey(userId, newTokenId), JSON.stringify(newSession), 'EX', SESSION_TTL_SECONDS)
         .set(cacheKey.createRefreshRotationKey(userId, tokenId), JSON.stringify(rotationResult), 'EX', REFRESH_ROTATION_GRACE_SECONDS)
         .del(sessionKey)
         .del(lockKey)

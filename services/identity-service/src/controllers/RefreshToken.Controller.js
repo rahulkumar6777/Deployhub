@@ -1,5 +1,5 @@
 import { refreshTokenService } from "../services/refreshToken.service.js";
-import {  getRefreshTokenOptions } from "../utils/cookieOption.js";
+import { getRefreshTokenOptions } from "../utils/cookieOption.js";
 import { clientIp } from "../../../../shared/utils/clientIp.js";
 import { returnError } from "../../../../shared/errors/sendError.js";
 
@@ -19,6 +19,7 @@ export const refreshTokenController = async (req, res) => {
             .json({ accessToken: result.AccessToken });
 
     } catch (error) {
+        console.log(error)
         returnError(res, error)
     }
 };
