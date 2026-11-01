@@ -1,3 +1,5 @@
+import { cacheKey } from "../cache/cacheKey";
+
 export const publishProjectStatus = async (redis, payload) => {
 
     const { projectId, status } = payload;
@@ -16,5 +18,5 @@ export const publishProjectStatus = async (redis, payload) => {
         String(Date.now())
     );
 
-    await redis.publish('deployhub:users:projects:status:updates', JSON.stringify({ projectId: String(projectId), status: String(status) }))
+    await redis.publish(cacheKey.userProjectStatusUpdate, JSON.stringify({ projectId: String(projectId), status: String(status) }))
 };

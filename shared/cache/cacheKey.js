@@ -9,4 +9,5 @@ export const cacheKey = {
     nodes: (nodeId) => `deployhub:nodes:${nodeId}`,
     nodeResourceSnapshot: (nodeId) => `deployhub:nodes:${nodeId}:resourceSnapshot`,
     nodelockKey: (nodeId) => `deployhub:nodes:node-resource-lock:${nodeId}`,
+    userProjectStatusUpdate: `deployhub:users:projects:status:updates`
 }
