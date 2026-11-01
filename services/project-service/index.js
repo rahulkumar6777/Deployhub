@@ -51,6 +51,11 @@ app.use(createInternalAUthMiddleware({
 
 
 
+import internalRouter from './src/routes/projectRouter.route.js';
+app.use('/internal', internalRouter);
+
+
+
 import userContext from '../../shared/middlewares/userContext.js';
 app.use(userContext);
 

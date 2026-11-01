@@ -9,7 +9,7 @@ import { getProjectController } from "../controllers/getProject.controller.js";
 const router = express.Router();
 
 
-router.route("/project").post(createProjectValidator, createProject).get(getProjectValidator, getProjectController)
+router.route("/").post(createProjectValidator, createProject).get(getProjectValidator, getProjectController)
 router.route('/payment/init').post(paymentInitValidator, paymentInitController);
 router.route('/payment/verify').post(paymentVerifyValidator, paymentVerifyController);
 
