@@ -23,7 +23,18 @@ end
 return { count, ttl }
 `;
 
-const policy = (name, windowSeconds, limit, subject) => Object.freeze({ name, windowSeconds, limit, subject });
+const policy = (name, windowSeconds, limit, subject) => {
+    if (
+        typeof name !== 'string' ||
+        !Number.isInteger(windowSeconds) || windowSeconds < 1 ||
+        !Number.isInteger(limit) || limit < 1 ||
+        typeof subject !== 'function'
+    ) {
+        throw new TypeError(`Invalid rate-limit policy configuration: ${name}`);
+    }
+
+    return Object.freeze({ name, windowSeconds, limit, subject });
+};
 
 const clientIp = (req) => {
     let value = String(req.ip || req.socket?.remoteAddress || 'unknown').trim();
@@ -117,7 +128,7 @@ const PROJECT_POLICIES = Object.freeze({
         policy('project:create:ip', 60 * 60, 4, (req) => `ip:${clientIp(req)}`),
     ],
     'GET /': [
-        policy('project:get:ip', 60 * 60, (req) => `ip:${clientIp(req)}`),
+        policy('project:get:ip', 60 * 60, 60, (req) => `ip:${clientIp(req)}`),
     ],
     'POST /payment/init': [
         policy('project:payment:init:ip', 60 * 60, 10, (req) => `ip:${clientIp(req)}`),
