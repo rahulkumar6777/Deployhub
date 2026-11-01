@@ -388,10 +388,12 @@ export const createProjectForPlan = async (
     });
 
 
-    project.dockerContainerName =
-        dockerContainerName(
-            project._id
-        );
+    if (project.type !== 'static') {
+        project.dockerContainerName =
+            dockerContainerName(
+                project._id
+            );
+    }
 
 
     await project.save({
