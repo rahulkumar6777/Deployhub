@@ -3,6 +3,7 @@ import { connectToMongoDB } from "./config/database/mongodb.js";
 import { connectRabbitMQ } from "./config/message-broker/rabbitmq.js";
 import { connectRedis } from "./config/redis/redis.js";
 import { envs } from "./lib/env.js";
+import { globalBuildDeploySheduler } from "./workers/globalBuildDeployShedular.js";
 
 const app = buildApp();
 
@@ -21,6 +22,9 @@ const start = async (port) => {
     app.listen(port, () => {
         console.log(`Node Manager service is running on port ${port}`);
     });
+
+    await globalBuildDeploySheduler();
+    
 };
 
 start(envs.PORT);
