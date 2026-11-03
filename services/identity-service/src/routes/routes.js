@@ -3,7 +3,8 @@ import { registerInitValidate, registerVerifyValidator } from '../validators/reg
 import { initRegisterController, verifyRegisterController } from '../controllers/register.controller.js';
 import { githubCallbackController, githubLoginController } from '../controllers/githubLogin.js';
 import { loginValidator } from '../validators/login.js';
-import { loginController } from '../controllers/login.controller.js';
+import { loginController, sendTwoFactorLoginEmailController, verifyTwoFactorLoginController, } from '../controllers/login.controller.js';
+import { beginTotpSetupController, changeTwoFactorMethodController, disableTwoFactorController, enableEmail2faController, enableTotpController, sendEmailSetupCodeController, twoFactorStatusController, } from '../controllers/twoFactor.controller.js';
 import { verifyJWT } from '../middleware/auth.middleware.js';
 import { listSessionsController, revokeSessionController, revokeAllSessionsController } from '../controllers/session.controller.js';
 import { refreshTokenController } from '../controllers/RefreshToken.Controller.js';
@@ -23,6 +24,15 @@ identityServiceRouter.post('/register/verify', registerVerifyValidator, verifyRe
 identityServiceRouter.get('/github', githubLoginController);
 identityServiceRouter.get('/github/callback', githubCallbackController);
 identityServiceRouter.post('/login', loginValidator, loginController)
+identityServiceRouter.post('/login/2fa/email', sendTwoFactorLoginEmailController);
+identityServiceRouter.post('/login/2fa/verify', verifyTwoFactorLoginController);
+identityServiceRouter.get('/2fa', verifyJWT, twoFactorStatusController);
+identityServiceRouter.post('/2fa/totp/setup', verifyJWT, beginTotpSetupController);
+identityServiceRouter.post('/2fa/totp/enable', verifyJWT, enableTotpController);
+identityServiceRouter.post('/2fa/email/send', verifyJWT, sendEmailSetupCodeController);
+identityServiceRouter.post('/2fa/email/enable', verifyJWT, enableEmail2faController);
+identityServiceRouter.put('/2fa/method', verifyJWT, changeTwoFactorMethodController);
+identityServiceRouter.delete('/2fa', verifyJWT, disableTwoFactorController);
 identityServiceRouter.get('/sessions', verifyJWT, listSessionsController);
 identityServiceRouter.delete('/sessions/:tokenId', verifyJWT, revokeSessionController);
 identityServiceRouter.delete('/sessions', verifyJWT, revokeAllSessionsController);

@@ -50,7 +50,21 @@ const userSchema = new mongoose.Schema(
             type: String,
             select: false
         },
-
+        twoFactorEnabled: {
+            type: Boolean,
+            default: false
+        },
+        twoFactorMethod: { 
+            type: String, 
+            enum: ['email', 'totp', null], 
+            default: null 
+        },
+        twoFactorTotpSecret: { 
+            type: String, select: false 
+        },
+        twoFactorPendingTotpSecret: { 
+            type: String, select: false 
+        },
         // Profile
         profilePic: {
             type: String,

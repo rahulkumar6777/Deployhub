@@ -84,6 +84,21 @@ const IDENTITY_POLICIES = Object.freeze({
             return value ? `email:${value}` : null;
         }),
     ],
+    'POST /login/2fa/email': [
+        policy('identity:2fa-email:ip', 5 * 60, 10, (req) => `ip:${clientIp(req)}`),
+    ],
+    'POST /login/2fa/verify': [
+        policy('identity:2fa-verify:ip', 5 * 60, 20, (req) => `ip:${clientIp(req)}`),
+    ],
+    'POST /2fa/email/send': [
+        policy('identity:2fa-setup-email:ip', 60 * 60, 5, (req) => `ip:${clientIp(req)}`),
+    ],
+    'POST /2fa/email/enable': [
+        policy('identity:2fa-enable-email:ip', 5 * 60, 10, (req) => `ip:${clientIp(req)}`),
+    ],
+    'POST /2fa/totp/enable': [
+        policy('identity:2fa-enable-totp:ip', 5 * 60, 20, (req) => `ip:${clientIp(req)}`),
+    ],
     'GET /sessions': [
         policy('identity:sessions-list:ip', 5 * 60, 30, (req) => `ip:${clientIp(req)}`),
     ],
