@@ -23,7 +23,6 @@ export const suggestNodeService = async (resources) => {
         throw new AppError("No active nodes found", 404);
     }
 
-    cacheKey
     for (const node of nodes) {
         const lockKey = cacheKey.nodelockKey(node.nodeId)
         const lockId = crypto.randomUUID();
@@ -33,13 +32,8 @@ export const suggestNodeService = async (resources) => {
         }
 
         try {
-            const nodeResources = await NodeResourceSnapshot.findOne({ nodeId: node.nodeId }).lean();
-            if (!nodeResources) {
-                continue;
-            }
-
-            const now = new Date();
             if (nodeType === "build") {
+                const now = new Date();
                 const activeBuilds = await NodeAllocation.countDocuments({
                     nodeId: node.nodeId,
                     nodeType: "build",
@@ -68,6 +62,13 @@ export const suggestNodeService = async (resources) => {
                     nodeIp: node.nodeIp
                 };
             }
+
+            const nodeResources = await NodeResourceSnapshot.findOne({ nodeId: node.nodeId }).lean();
+            if (!nodeResources) {
+                continue;
+            }
+
+            const now = new Date();
 
             const allocations = await NodeAllocation.find({
                 nodeId: node.nodeId,
