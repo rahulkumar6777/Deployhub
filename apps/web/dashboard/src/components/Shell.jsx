@@ -60,7 +60,9 @@ export default function Shell() {
     : nav.find((n) => n.to === location.pathname)?.name ||
       (location.pathname.includes('/new')
         ? 'New project'
-        : location.pathname.includes('sessions')
+        : location.pathname.includes('security')
+          ? 'Sign-in security'
+          : location.pathname.includes('sessions')
           ? 'Sessions'
           : location.pathname === '/profile'
             ? 'Account settings'
@@ -117,6 +119,10 @@ export default function Shell() {
           <NavLink to="/settings/sessions" onClick={() => setMobile(false)}>
             <ShieldCheck size={18} />
             Sessions
+          </NavLink>
+          <NavLink to="/settings/security" onClick={() => setMobile(false)}>
+            <ShieldCheck size={18} />
+            Sign-in security
           </NavLink>
         </nav>
         <div className="sidebar-bottom">

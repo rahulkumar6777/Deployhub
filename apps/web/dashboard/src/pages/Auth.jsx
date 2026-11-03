@@ -11,7 +11,7 @@ import { redirectPathFromState, storeAuthRedirect } from '../routes/authRedirect
 import { Logo } from '../components/ui'
 
 export default function Auth({ signup = false }) {
-  const { login } = useAuth(),
+  const { login, finishTwoFactorLogin } = useAuth(),
     location = useLocation(),
     navigate = useNavigate()
   const [form, setForm] = useState({ fullName: '', email: '', password: '' }),
@@ -19,7 +19,10 @@ export default function Auth({ signup = false }) {
     [busy, setBusy] = useState(false),
     [error, setError] = useState(''),
     [verify, setVerify] = useState(false),
-    [otp, setOtp] = useState('')
+    [otp, setOtp] = useState(''),
+    [twoFactor, setTwoFactor] = useState(null),
+    [twoFactorCode, setTwoFactorCode] = useState(''),
+    [emailCodeSent, setEmailCodeSent] = useState(false)
   const redirect = redirectPathFromState(location.state)
   async function submit(e) {
     e.preventDefault()
@@ -33,9 +36,36 @@ export default function Auth({ signup = false }) {
       } else if (signup) {
         await api.post('/auth/register/init', form)
         setVerify(true)
-      } else await login(form.email, form.password, redirect)
+      } else {
+        const result = await login(form.email, form.password, redirect)
+        if (result?.requiresTwoFactor) setTwoFactor(result)
+      }
     } catch (e) {
       setError(e.response?.data?.message || e.message || 'Please try again.')
+    } finally {
+      setBusy(false)
+    }
+  }
+  async function sendTwoFactorEmail() {
+    setBusy(true)
+    setError('')
+    try {
+      await api.post('/auth/login/2fa/email', { challengeToken: twoFactor.challengeToken })
+      setEmailCodeSent(true)
+    } catch (e) {
+      setError(e.response?.data?.message || 'Could not send the verification code')
+    } finally {
+      setBusy(false)
+    }
+  }
+  async function submitTwoFactor(e) {
+    e.preventDefault()
+    setBusy(true)
+    setError('')
+    try {
+      await finishTwoFactorLogin(twoFactor.challengeToken, twoFactorCode, twoFactor.redirectTo || redirect)
+    } catch (e) {
+      setError(e.response?.data?.message || e.message || 'Verification failed')
     } finally {
       setBusy(false)
     }
@@ -114,27 +144,35 @@ export default function Auth({ signup = false }) {
         </div>
         <div className="auth-form-wrap">
           <span className="eyebrow">
-            {verify
-              ? 'ONE LAST THING'
-              : signup
-                ? 'GREAT THINGS START HERE'
-                : 'YOUR WORKSPACE IS WAITING'}
+            {twoFactor
+              ? 'ACCOUNT SECURITY'
+              : verify
+                ? 'ONE LAST THING'
+                : signup
+                  ? 'GREAT THINGS START HERE'
+                  : 'YOUR WORKSPACE IS WAITING'}
           </span>
           <h2>
-            {verify
-              ? 'Check your inbox.'
-              : signup
-                ? 'Let’s bring your ideas to life.'
-                : 'Welcome back, builder.'}
+            {twoFactor
+              ? 'Verify it’s you.'
+              : verify
+                ? 'Check your inbox.'
+                : signup
+                  ? 'Let’s bring your ideas to life.'
+                  : 'Welcome back, builder.'}
           </h2>
           <p>
-            {verify
-              ? `We sent a verification code to ${form.email}.`
-              : signup
-                ? 'Make something you’re excited to share.'
-                : 'Pick up where you left off. Your next great thing is waiting.'}
+            {twoFactor
+              ? twoFactor.method === 'email'
+                ? 'Enter the code sent to your account email to finish signing in.'
+                : 'Enter the current 6-digit code from your authenticator app.'
+              : verify
+                ? `We sent a verification code to ${form.email}.`
+                : signup
+                  ? 'Make something you’re excited to share.'
+                  : 'Pick up where you left off. Your next great thing is waiting.'}
           </p>
-          {!verify && (
+          {!verify && !twoFactor && (
             <>
               <button className="btn github-button" disabled={busy} onClick={github}>
                 <Github size={18} />
@@ -145,102 +183,155 @@ export default function Auth({ signup = false }) {
               </div>
             </>
           )}
-          <form onSubmit={submit}>
-            {error && (
-              <div className="form-error" role="alert">
-                {error}
-              </div>
-            )}
-            {verify ? (
-              <label className="field">
-                Verification code
-                <input
-                  autoFocus
-                  aria-label="Verification code"
-                  inputMode="numeric"
-                  autoComplete="one-time-code"
-                  pattern="[0-9]{6}"
-                  maxLength={6}
-                  required
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
-                  placeholder="000000"
-                />
-              </label>
-            ) : (
-              <>
-                {signup && (
+          {twoFactor ? (
+            <form onSubmit={submitTwoFactor}>
+              {error && (
+                <div className="form-error" role="alert">
+                  {error}
+                </div>
+              )}
+              {twoFactor.method === 'email' && !emailCodeSent ? (
+                <button
+                  type="button"
+                  className="btn primary full-width"
+                  disabled={busy}
+                  onClick={sendTwoFactorEmail}
+                >
+                  {busy ? 'Sending code…' : 'Send code to my email'}
+                </button>
+              ) : (
+                <>
                   <label className="field">
-                    Full name
+                    {twoFactor.method === 'email' ? 'Email verification code' : 'Authenticator code'}
                     <input
-                      name="fullName"
-                      autoComplete="name"
+                      autoFocus
+                      inputMode="numeric"
+                      autoComplete="one-time-code"
+                      pattern="[0-9]{6}"
+                      maxLength={6}
                       required
-                      value={form.fullName}
-                      onChange={(e) => setForm({ ...form, fullName: e.target.value })}
-                      placeholder="Your full name"
+                      value={twoFactorCode}
+                      onChange={(event) => setTwoFactorCode(event.target.value.replace(/\D/g, ''))}
+                      placeholder="000000"
                     />
                   </label>
-                )}
-                <label className="field">
-                  Email address
-                  <input
-                    type="email"
-                    name="email"
-                    autoComplete="email"
-                    required
-                    value={form.email}
-                    onChange={(e) => setForm({ ...form, email: e.target.value })}
-                    placeholder="you@example.com"
-                  />
-                </label>
-                <label className="field">
-                  Password
-                  <div className="password-input">
-                    <input
-                      name="password"
-                      type={visible ? 'text' : 'password'}
-                      autoComplete={signup ? 'new-password' : 'current-password'}
-                      required
-                      minLength={signup ? 8 : 1}
-                      value={form.password}
-                      onChange={(e) => setForm({ ...form, password: e.target.value })}
-                      placeholder={signup ? 'At least 8 characters' : 'Enter your password'}
-                      aria-describedby={signup ? 'password-requirements' : undefined}
-                    />
+                  <button
+                    className="btn primary full-width auth-submit"
+                    disabled={busy || twoFactorCode.length !== 6}
+                  >
+                    {busy ? 'Verifying…' : 'Verify and sign in'} <ArrowRight size={16} />
+                  </button>
+                  {twoFactor.method === 'email' && (
                     <button
                       type="button"
-                      aria-label={visible ? 'Hide password' : 'Show password'}
-                      onClick={() => setVisible((v) => !v)}
+                      className="btn full-width"
+                      disabled={busy}
+                      onClick={sendTwoFactorEmail}
                     >
-                      {visible ? <EyeOff size={17} /> : <Eye size={17} />}
+                      Send a new code
                     </button>
-                  </div>
-                  {signup && (
-                    <small id="password-requirements">
-                      Use uppercase and lowercase letters, a number, and a special character
-                      (@$!%*?&).
-                    </small>
                   )}
+                </>
+              )}
+            </form>
+          ) : (
+            <form onSubmit={submit}>
+              {error && (
+                <div className="form-error" role="alert">
+                  {error}
+                </div>
+              )}
+              {verify ? (
+                <label className="field">
+                  Verification code
+                  <input
+                    autoFocus
+                    aria-label="Verification code"
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    pattern="[0-9]{6}"
+                    maxLength={6}
+                    required
+                    value={otp}
+                    onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
+                    placeholder="000000"
+                  />
                 </label>
-              </>
-            )}
-            <button className="btn primary full-width auth-submit" disabled={busy}>
-              {busy
-                ? 'Just a moment…'
-                : verify
-                  ? 'Verify email'
-                  : signup
-                    ? 'Create your account'
-                    : 'Let’s get building'}
-              <ArrowRight size={16} />
-            </button>
-            {verify && (
-              <button type="button" className="btn full-width" disabled={busy} onClick={resend}>
-                Resend verification code
+              ) : (
+                <>
+                  {signup && (
+                    <label className="field">
+                      Full name
+                      <input
+                        name="fullName"
+                        autoComplete="name"
+                        required
+                        value={form.fullName}
+                        onChange={(e) => setForm({ ...form, fullName: e.target.value })}
+                        placeholder="Your full name"
+                      />
+                    </label>
+                  )}
+                  <label className="field">
+                    Email address
+                    <input
+                      type="email"
+                      name="email"
+                      autoComplete="email"
+                      required
+                      value={form.email}
+                      onChange={(e) => setForm({ ...form, email: e.target.value })}
+                      placeholder="you@example.com"
+                    />
+                  </label>
+                  <label className="field">
+                    Password
+                    <div className="password-input">
+                      <input
+                        name="password"
+                        type={visible ? 'text' : 'password'}
+                        autoComplete={signup ? 'new-password' : 'current-password'}
+                        required
+                        minLength={signup ? 8 : 1}
+                        value={form.password}
+                        onChange={(e) => setForm({ ...form, password: e.target.value })}
+                        placeholder={signup ? 'At least 8 characters' : 'Enter your password'}
+                        aria-describedby={signup ? 'password-requirements' : undefined}
+                      />
+                      <button
+                        type="button"
+                        aria-label={visible ? 'Hide password' : 'Show password'}
+                        onClick={() => setVisible((v) => !v)}
+                      >
+                        {visible ? <EyeOff size={17} /> : <Eye size={17} />}
+                      </button>
+                    </div>
+                    {signup && (
+                      <small id="password-requirements">
+                        Use uppercase and lowercase letters, a number, and a special character
+                        (@$!%*?&).
+                      </small>
+                    )}
+                  </label>
+                </>
+              )}
+              <button className="btn primary full-width auth-submit" disabled={busy}>
+                {busy
+                  ? 'Just a moment…'
+                  : verify
+                    ? 'Verify email'
+                    : signup
+                      ? 'Create your account'
+                      : 'Let’s get building'}
+                <ArrowRight size={16} />
               </button>
-            )}
-          </form>
+              {verify && (
+                <button type="button" className="btn full-width" disabled={busy} onClick={resend}>
+                  Resend verification code
+                </button>
+              )}
+            </form>
+          )}
           <div className="auth-footnote">
             <Check size={14} />
             Your code. Your ideas. Your space to build.

@@ -137,6 +137,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password, redirectTo = '/') => {
     const res = await api.post('/auth/login', { email, password })
+    if (res.data?.requiresTwoFactor) return { ...res.data, redirectTo }
     const token = getTokenFromResponse(res.data)
 
     if (!token) throw new Error('Login failed')
@@ -149,6 +150,20 @@ export const AuthProvider = ({ children }) => {
     }
 
     navigate(redirectTo, { replace: true })
+    return { authenticated: true }
+  }
+
+  const finishTwoFactorLogin = async (challengeToken, code, redirectTo = '/') => {
+    const res = await api.post('/auth/login/2fa/verify', { challengeToken, code })
+    const token = getTokenFromResponse(res.data)
+    if (!token) throw new Error('Verification failed')
+    setToken(token)
+    const profile = await fetchUser({ force: true })
+    if (!profile) {
+      clearAuth()
+      throw new Error('Could not load user profile')
+    }
+    navigate(redirectTo, { replace: true })
   }
 
   return (
@@ -159,6 +174,7 @@ export const AuthProvider = ({ children }) => {
         user,
         fetchUser,
         login,
+        finishTwoFactorLogin,
         logout,
         refreshAccessToken,
       }}

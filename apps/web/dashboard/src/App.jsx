@@ -7,6 +7,7 @@ import { Dashboard, Projects, WorkspaceAnalytics, WorkspaceBilling } from './pag
 import Auth from './pages/Auth'
 import Sessions from './pages/Sessions'
 import NewProject from './pages/NewProject'
+import Security from './pages/Security'
 
 function Protected() {
   const { isAuthenticated, isAuthReady } = useAuth()
@@ -36,6 +37,7 @@ export default function App() {
           <Route path="analytics" element={<WorkspaceAnalytics />} />
           <Route path="billing" element={<WorkspaceBilling />} />
           <Route path="settings/sessions" element={<Sessions />} />
+          <Route path="settings/security" element={<Security />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Route>
