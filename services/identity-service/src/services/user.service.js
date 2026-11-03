@@ -25,6 +25,33 @@ export const userFullnameService = async (userId, fullName) => {
 
 }
 
+export const userPasswordService = async (userId, currentPassword, newPassword) => {
+    const user = await User.findById(userId).select('+password');
+
+    if (!user) {
+        throw new AppError('User not found', 404);
+    }
+
+    if (user.provider !== 'local') {
+        throw new AppError('Password updates are only available for local accounts', 409);
+    }
+
+    const passwordIsValid = await user.comparePassword(currentPassword);
+    if (!passwordIsValid) {
+        throw new AppError('Current password is incorrect', 400);
+    }
+
+    const isSamePassword = await user.comparePassword(newPassword);
+    if (isSamePassword) {
+        throw new AppError('New password must be different from your current password', 400);
+    }
+
+    user.password = newPassword;
+    await user.save();
+
+    return user;
+};
+
 export const userProfilePicService = async (userId, file) => {
 
     const drop = await domainDrop({ DomainDrop, apiKey: env.DOMAINDROP_API_KEY });
@@ -60,7 +87,7 @@ export const userProfilePicService = async (userId, file) => {
 
     const updateUser = await User.findOneAndUpdate(
         { _id: userId },
-        { profileFileId: uplaodResult.id, profilePic: profilePicUrl },
+        { profileFileId: uplaodResult.id, profilePic: profilePicUrl.url },
         { returnDocument: 'after', upsert: false }
     );
 

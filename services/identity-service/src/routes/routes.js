@@ -11,8 +11,9 @@ import { refreshTokenController } from '../controllers/RefreshToken.Controller.j
 import { logoutController } from '../controllers/logout.controller.js';
 import upload, { handleUploadError } from '../middleware/multer.middleware.js';
 import { profilePicValidator } from '../validators/profilePic.js';
-import { getUserReposController, userFullNameCOntroller, userMeController, userProfilePicController } from '../controllers/user.controller.js';
+import { getUserReposController, userFullNameCOntroller, userMeController, userPasswordController, userProfilePicController } from '../controllers/user.controller.js';
 import { userFullNameValidator } from '../validators/user.js';
+import { passwordUpdateValidator } from '../validators/password.js';
 import { resendOtpValidator } from '../validators/resendOtp.validator.js';
 import { resendOtpController } from '../controllers/resendOtp.controller.js';
 
@@ -40,6 +41,7 @@ identityServiceRouter.get('/refresh/token', refreshTokenController)
 identityServiceRouter.post('/logout', logoutController)
 identityServiceRouter.put('/user/profile-pic', verifyJWT, upload.single('profilePic'), handleUploadError, profilePicValidator, userProfilePicController);
 identityServiceRouter.put('/user/fullname', verifyJWT, userFullNameValidator, userFullNameCOntroller);
+identityServiceRouter.put('/user/password', verifyJWT, passwordUpdateValidator, userPasswordController);
 identityServiceRouter.get('/user/repos', verifyJWT, getUserReposController);
 identityServiceRouter.post('/resendotp', resendOtpValidator, resendOtpController);
 identityServiceRouter.get('/user/me', verifyJWT, userMeController)

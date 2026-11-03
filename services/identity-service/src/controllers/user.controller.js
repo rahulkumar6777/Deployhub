@@ -1,5 +1,6 @@
 import { validationResult } from "express-validator";
-import { getUserGIthubToken, getUserRepositories, userFullnameService, userMeService, userProfilePicService } from "../services/user.service.js";
+import { getUserGIthubToken, getUserRepositories, userFullnameService, userMeService, userPasswordService, userProfilePicService } from "../services/user.service.js";
+import { revokeOtherSessions } from '../services/sessionManagement.service.js';
 import fs from 'fs/promises';
 import { returnError } from "../../../../shared/errors/sendError.js";
 
@@ -34,6 +35,35 @@ export const userFullNameCOntroller = async (req, res) => {
             }
         })
 
+    } catch (error) {
+        returnError(res, error);
+    }
+};
+
+
+export const userPasswordController = async (req, res) => {
+    try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({
+                message: errors.array()[0].msg,
+            });
+        }
+
+        await userPasswordService(
+            req.user._id,
+            req.body.currentPassword,
+            req.body.newPassword
+        );
+        await revokeOtherSessions({
+            userId: req.user._id,
+            currentTokenId: req.user.tokenId,
+        });
+
+        return res.status(200).json({
+            success: true,
+            message: 'Password updated. Other sessions have been signed out.',
+        });
     } catch (error) {
         returnError(res, error);
     }
