@@ -8,7 +8,7 @@ const router = express.Router();
 
 router.use(internalApiCallMiddleware({ secret: env.INTERNAL_SERVICE_TALKING_SECRET, header: "x-internal-secret" }));
 
-router.route('/project').get(getProjectValidator, getProjectController)
+router.route('/project/:projectId').get(getProjectValidator, getProjectController)
 
 
 export default router;
