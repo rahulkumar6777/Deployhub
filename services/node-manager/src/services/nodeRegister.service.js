@@ -42,7 +42,7 @@ export const nodeRegisterService = async (nodeData) => {
 
     let nodeResourceSnapshot;
 
-    if (nodetype === 'deploy') {
+    if (nodetype === 'deploy-dynamic') {
         nodeResourceSnapshot = new NodeResourceSnapshot({
             node: node._id,
             nodeId,
