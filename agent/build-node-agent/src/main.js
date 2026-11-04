@@ -6,10 +6,6 @@ import { connectRedis } from "./config/redis.js";
 const app = await buildApp();
 
 
-
-import './jobs/nodeverification.jobs.js'
-
-
 const start = async (port) => {
 
     await nodeVerify();
@@ -23,5 +19,6 @@ const start = async (port) => {
 start(process.env.PORT || 4522);
 
 
-// jobs shedul
+// jobs shedule
+import './jobs/nodeverification.jobs.js'
 //import './worker/build.worker.js'
