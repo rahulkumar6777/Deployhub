@@ -3,6 +3,7 @@ import { initPaidProjectPayment, verifyPaidProjectPayment } from '../services/cr
 import { returnError } from '../../../../shared/errors/sendError.js'
 import { publishGlobal } from '../config/message-broker/rabbitmq.js';
 import { createBuild } from '../../utils/createBuild.js';
+import { buildAndDeployStatusForQueues } from '../../../../shared/constants/buildanddeploystatusforqueues.js';
 import { publishProjectStatus } from '../../../../shared/utils/publishProjectStatus.js';
 import { getRedis } from '../core/redis/client.js';
 import { Project } from '../models/project.model.js';
@@ -65,8 +66,10 @@ export const paymentVerifyController = async (req, res) => {
         }
 
         await publishGlobal({
-            event: "BUILD_REQUESTED",
+            event: "BUILD",
+            status: buildAndDeployStatusForQueues.build["build-requested"],
             buildId,
+            projectType: project.type,
             ...data,
             firstTime: true
         });
