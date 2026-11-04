@@ -45,7 +45,7 @@ export const connectRabbitMQ = async () => {
 
         // global build and deploy task shedular
         await channel.assertQueue(
-            QUEUE_NAMES.BUILD_NODE(process.env.NODE_ID),
+            QUEUE_NAMES.DEPLOY_NODE(process.env.NODE_ID),
             {
                 durable: true,
             }
