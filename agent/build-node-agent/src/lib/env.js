@@ -7,6 +7,11 @@ const requiredEnvs = [
     "RABBIT_MQ_URL",
     "DOMAINDROP_API_KEY",
     "DOMAINDROP_SPACE_ID",
+    "REDIS_HOST",
+    "REDIS_PORT",
+    "REDIS_PASSWORD",
+    "PROJECT_SERVICE_URL",
+    "BUILD_SERVICE_URL"
 ];
 for (const key of requiredEnvs) {
     if (!process.env[key]) {
@@ -28,4 +33,6 @@ export const envs = {
     REDIS_TLS: process.env.REDIS_TLS === "true",
     DOMAINDROP_API_KEY: process.env.DOMAINDROP_API_KEY,
     DOMAINDROP_SPACE_ID: process.env.DOMAINDROP_SPACE_ID,
+    PROJECT_SERVICE_URL: process.env.PROJECT_SERVICE_URL,
+    BUILD_SERVICE_URL: process.env.BUILD_SERVICE_URL,
 }
