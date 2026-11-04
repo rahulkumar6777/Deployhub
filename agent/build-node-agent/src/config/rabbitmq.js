@@ -51,11 +51,18 @@ export const connectRabbitMQ = async () => {
             }
         );
 
-        console.log("RabbitMQ connected");
+        await channel.assertQueue(
+            QUEUE_NAMES.BUILD_STATUS_QUEUE(process.env.NODE_ID),
+            {
+                durable: true,
+            }
+        );
 
         for (const cb of onReadyCallbacks) {
             await cb(channel);
         }
+
+        console.log("RabbitMQ connected");
     } catch (err) {
         console.error("RabbitMQ connect failed:", err.message);
         channel = null;
