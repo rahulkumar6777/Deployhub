@@ -7,6 +7,7 @@ import { Project } from '../models/project.model.js';
 import { publishProjectStatus } from '../../../../shared/utils/publishProjectStatus.js'
 import { getRedis } from '../core/redis/client.js';
 import { createBuild } from '../../utils/createBuild.js';
+import { buildAndDeployStatusForQueues } from '../../../../shared/constants/buildanddeploystatusforqueues.js';
 
 
 export const createProject = async (req, res) => {
@@ -44,8 +45,10 @@ export const createProject = async (req, res) => {
         }
 
         await publishGlobal({
-            event: "BUILD_REQUESTED",
+            event: "BUILD",
+            status: buildAndDeployStatusForQueues.build["build-requested"],
             buildId,
+            projectType: project.type,
             ...data,
             firstTime: true
         });
