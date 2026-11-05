@@ -1,12 +1,12 @@
 import { validationResult } from 'express-validator';
-import { initPaidProjectPayment, verifyPaidProjectPayment } from '../services/users/createProject.service.js';
-import { returnError } from '../../../../shared/errors/sendError.js'
-import { publishGlobal } from '../config/message-broker/rabbitmq.js';
-import { createBuild } from '../../utils/createBuild.js';
-import { buildAndDeployStatusForQueues } from '../../../../shared/constants/buildanddeploystatusforqueues.js';
-import { publishProjectStatus } from '../../../../shared/utils/publishProjectStatus.js';
-import { getRedis } from '../core/redis/client.js';
-import { Project } from '../models/project.model.js';
+import { initPaidProjectPayment, verifyPaidProjectPayment } from '../../services/users/createProject.service.js';
+import { returnError } from '../../../../../shared/errors/sendError.js'
+import { publishGlobal } from '../../config/message-broker/rabbitmq.js';
+import { createBuild } from '../../../utils/createBuild.js';
+import { buildAndDeployStatusForQueues } from '../../../../../shared/constants/buildanddeploystatusforqueues.js';
+import { publishProjectStatus } from '../../../../../shared/utils/publishProjectStatus.js';
+import { getRedis } from '../../core/redis/client.js';
+import { Project } from '../../models/project.model.js';
 
 
 

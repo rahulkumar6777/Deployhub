@@ -1,6 +1,6 @@
 import express from 'express';
 import { getProjectValidator } from '../validators/getProject.validator.js';
-import { getProjectController } from '../controllers/getProject.controller.js';
+import { getProjectController } from '../controllers/for-internal-service/getProject.controller.js';
 import { internalApiCallMiddleware } from '../../../../shared/middlewares/interalApiCall.js';
 import { env } from '../lib/env.js';
 

@@ -1,5 +1,5 @@
-import { getProjectService } from "../services/for-internal-service/getProject.service.js";
-import { returnError } from '../../../../shared/errors/sendError.js'
+import { getProjectService } from "../../services/for-internal-service/getProject.service.js";
+import { returnError } from '../../../../../shared/errors/sendError.js'
 import { validationResult } from "express-validator";
 
 export const getProjectController = async (req, res) => {
