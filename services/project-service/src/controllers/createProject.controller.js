@@ -1,6 +1,6 @@
 import { validationResult } from 'express-validator';
 import { AppError } from '../../../../shared/errors/AppError.js';
-import { createFreeProject } from '../services/createProject.service.js';
+import { createFreeProject } from '../services/users/createProject.service.js';
 import { returnError } from '../../../../shared/errors/sendError.js'
 import { publishGlobal } from '../config/message-broker/rabbitmq.js';
 import { Project } from '../models/project.model.js';

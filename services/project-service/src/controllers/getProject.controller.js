@@ -1,4 +1,4 @@
-import { getProjectService } from "../services/getProject.service.js";
+import { getProjectService } from "../services/for-internal-service/getProject.service.js";
 import { returnError } from '../../../../shared/errors/sendError.js'
 import { validationResult } from "express-validator";
 
