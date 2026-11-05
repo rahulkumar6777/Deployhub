@@ -11,7 +11,9 @@ const requiredEnvs = [
     "REDIS_PORT",
     "REDIS_PASSWORD",
     "PROJECT_SERVICE_URL",
-    "BUILD_SERVICE_URL"
+    "BUILD_SERVICE_URL",
+    "INTERNAL_SERVICE_TALKING_SECRET",
+    "INTERNAL_SECRET"
 ];
 for (const key of requiredEnvs) {
     if (!process.env[key]) {
@@ -35,4 +37,6 @@ export const envs = {
     DOMAINDROP_SPACE_ID: process.env.DOMAINDROP_SPACE_ID,
     PROJECT_SERVICE_URL: process.env.PROJECT_SERVICE_URL,
     BUILD_SERVICE_URL: process.env.BUILD_SERVICE_URL,
+    INTERNAL_SERVICE_TALKING_SECRET: process.env.INTERNAL_SERVICE_TALKING_SECRET,
+    INTERNAL_SECRET: process.env.INTERNAL_SECRET
 }
