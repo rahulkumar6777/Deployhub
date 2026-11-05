@@ -4,6 +4,8 @@
 > **Document type:** System architecture and design reference  
 > **Purpose:** Establish shared understanding of system boundaries, responsibilities, and operational behavior.
 
+> For the repository-specific stack, current implementation status, and phased roadmap, see [docs/system-design.md](docs/system-design.md).
+
 ## How to use this document
 
 This document defines the **intended system architecture for DeployHub**. It is written for developers who need to understand the complete platform before implementing, reviewing, or changing an individual service.
