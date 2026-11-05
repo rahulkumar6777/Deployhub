@@ -59,7 +59,6 @@ export const connectRabbitMQ = async () => {
         );
 
         await channel.assertQueue(QUEUE_NAMES.BUILD_DATA_UPDATE_QUEUE, { durable: true });
-        await channel.assertQueue(QUEUE_NAMES.DEPLOY_DATA_UPDATE_QUEUE, { durable: true });
 
         for (const cb of onReadyCallbacks) {
             await cb(channel);
