@@ -35,6 +35,7 @@ export const globalBuildDeploySheduler = async () => {
 
           // here now i send the suggested node to the build service via another queue
           await publishToNode("build", suggestedNode.nodeId, {
+            event,
             buildId,
             projectId,
             userId,
@@ -69,6 +70,7 @@ export const globalBuildDeploySheduler = async () => {
           }
 
           await publishToNode("deploy", suggestedNode.nodeId, {
+            event,
             buildId,
             projectId,
             userId,
