@@ -6,6 +6,7 @@ import { env } from '../lib/env.js';
 
 const router = express.Router();
 
+
 router.use(internalApiCallMiddleware({ secret: env.INTERNAL_SERVICE_TALKING_SECRET, header: "x-internal-secret" }));
 
 router.route('/project/:projectId').get(getProjectValidator, getProjectController)
