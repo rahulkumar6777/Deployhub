@@ -8,6 +8,7 @@ import { domainDrop } from "../../../../shared/domaindrop/domaindrop.js";
 import { env } from "../lib/env.js";
 import { deleteFromDomainDrop } from "../../../../shared/domaindrop/delete.js";
 import { getFileUrlDomainDrop } from "../../../../shared/domaindrop/getfileUrl.js";
+import { domainDropFilesPathKey } from "../../../../shared/domaindrop/filesPathkey.js";
 
 
 export const userFullnameService = async (userId, fullName) => {
@@ -80,7 +81,8 @@ export const userProfilePicService = async (userId, file) => {
         mimeType: file.mimetype,
         userId,
         spaceId: env.DOMAINDROP_SPACE_ID,
-        label: 'profile'
+        label: 'profile',
+        path: domainDropFilesPathKey.profilePic(file.filename, userId)
     });
 
     const profilePicUrl = await getFileUrlDomainDrop({ domainDrop: drop, fileId: uplaodResult.id, DomainDropError })
