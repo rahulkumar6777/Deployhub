@@ -6,7 +6,21 @@ import { publishProjectStatus } from "../../../../shared/utils/publishProjectSta
 import { getChannel } from "../config/rabbitmq.js";
 import { getRedis } from "../config/redis.js";
 import { envs } from "../lib/env.js";
-import axios from 'axios'
+import axios from 'axios';
+import path from "path";
+import { typeLangVersionSelector } from "../utils/languageVersion.js";
+import { generateDockerfile } from "../../../../shared/docker/generateDockerfile.js";
+import { checkAndPullImage } from "../../../../shared/docker/checkAndPullImage.js";
+import Docker from "dockerode";
+import { GitCloner } from "../../../../shared/git/gitrepoCloner.js";
+import fs from 'fs';
+import tar from "tar-fs";
+import { dockerProgress } from "../../../../shared/docker/dockerProgress.js";
+import { buildDockerImage } from "../../../../shared/docker/buildImage.js";
+import * as maintar from 'tar';
+import { pushDockerImage } from "../../../../shared/docker/pushImage.js";
+import { BuildLogger } from "../utils/buildLogger.js";
+import { uploadLog } from "../utils/uploader.js";
 
 
 export const globalBuildSheduler = async () => {
@@ -14,29 +28,61 @@ export const globalBuildSheduler = async () => {
     const channel = getChannel();
     const redis = getRedis();
 
-    // here some univesal variables
-    let projectData;
-    let userGithubAcessToken;
+    const docker = new Docker()
 
-    let startedAt;
-    let finishedAt;
+    // ye base repo folder path hai
+    const baserepopath = path.resolve('builds');
+
+
+    // ye docker ka credentials hai
+    const dockerUsername = envs.DOCKER_USERNAME;
+    const dockerPassword = envs.DOCKER_PASSWORD;
+
 
     await channel.consume(QUEUE_NAMES.BUILD_NODE(process.env.NODE_ID), async (msg) => {
         if (!msg) return;
+
+        // here some univesal variables
+        let projectData;
+        let userGithubAcessToken;
+
+        let imageName;
+
+        // ye buildfilepath ka pura folder path hai
+        let buildFilePath;
+
+        let logsFile;
+
+        let startedAt;
+        let finishedAt;
+        let logger;
+        let buildId;
+        let projectId;
+        let logsUrl = null;
+        let buildStatus = 'failed';
+
         try {
-
-
-            startedAt = new Date()
-
-
             const content = JSON.parse(msg.content.toString());
-            const { event, buildId, projectId, userId, projectName, firstTime, status, projectType, allocationId } = content;
+            ({ buildId, projectId } = content);
+            const { event, userId, projectName, firstTime, status, projectType, allocationId } = content;
+
+            logger = new BuildLogger(buildId, projectId);
+            await logger.start();
+            startedAt = new Date();
 
 
             await publishProjectStatus(redis, { projectId: projectId, status: 'building' })
             await channel.sendToQueue(QUEUE_NAMES.BUILD_STATUS_QUEUE, Buffer.from(JSON.stringify({ projectId, status: 'building' })), {
                 persistent: true
             });
+
+            // here i make docker image name
+            imageName = `${dockerUsername}/${projectId.toString().toLowerCase()}:${buildId.toString().toLowerCase()}`;
+
+            // base repo path
+            if (!fs.existsSync(baserepopath)) {
+                fs.mkdirSync(baserepopath, { recursive: true });
+            }
 
             if (event === "BUILD") {
                 if (status === buildAndDeployStatusForQueues.build["build-requested"]) {
@@ -51,19 +97,226 @@ export const globalBuildSheduler = async () => {
                     });
 
                     projectData = rawData.data.projectData;
-                    console.log( projectData);
+                    console.log(projectData);
 
                     userGithubAcessToken = await getUserGithubAccessToken(axios, envs.IDENTITY_SERVICE_URL, userId, envs.INTERNAL_SERVICE_TALKING_SECRET, envs.INTERNAL_SECRET)
-                    
+
                     // here fetch commitsha
                     const commitSha = await fetchCommitSha(projectData.repoUrl, projectData.branch, userGithubAcessToken);
+
+                    // build filepath
+                    buildFilePath = path.resolve(baserepopath, buildId.toString());
+
+                    // check build se bahar na jaye user
+                    if (!buildFilePath.startsWith(baserepopath)) {
+                        throw new Error('Invalid build path');
+                    }
+
+                    // yeha pe agar buildFilePath nhi hai to create ho jayega
+                    if (!fs.existsSync(buildFilePath)) fs.mkdirSync(buildFilePath, { recursive: true });
+
+                    let dynamicBuildArgs = {};
+
+                    if (projectData.type === 'static') {
+                        let viteEnvContent = '';
+
+                        for (const envVar of projectData.env || []) {
+                            viteEnvContent += `${envVar.key}=${envVar.encryptedValue}\n`;
+                        }
+
+                        dynamicBuildArgs.VITE_ENV_CONTENT = viteEnvContent;
+                    }
+
+                    const lanVersion = typeLangVersionSelector(projectData.type, projectData.version);
+
+                    await logger.writeLine(`cloning repo ${projectData.repoUrl}`);
+
+                    try {
+                        await GitCloner.clone({ repoUrl: projectData.repoUrl, branch: projectData.branch, targetPath: buildFilePath, githubToken: userGithubAcessToken, folderName: projectData.rootDirectory })
+
+                    } catch (error) {
+                        switch (error.code) {
+                            case "BRANCH_NOT_FOUND":
+                                await logger.writeLine(error.message);
+                                break;
+
+                            case "REPO_NOT_FOUND":
+                                await logger.writeLine(error.message);
+                                break;
+
+                            case "AUTH_FAILED":
+                                await logger.writeLine(error.message);
+                                break;
+
+                            default:
+                                await logger.writeLine(`Failed to clone repository`);
+                        }
+                        throw error
+                    }
+                    await logger.writeLine(`repo cloned successfully`);
+
+                    // yeha pe docker file likha ja raha hai , based on proejct type
+                    const dockerfileContent =
+                        generateDockerfile({
+                            projectType: project.type,
+                            version: project.version,
+                            buildCommand: project?.buildCommand,
+                            startCommand: project?.startCommand
+                        });
+
+                    // and yeha pe jo buildfilepath hai uske dockerfike copy ho raha hai
+                    await fs.writeFileSync(
+                        path.join(buildFilePath, "Dockerfile"),
+                        dockerfileContent
+                    );
+
+                    await logger.writeLine(`pulling base image ${lanVersion}`)
+
+                    await checkAndPullImage(docker, lanVersion)
+
+                    await logger.writeLine(`base image ready`)
+
+                    const buildContext = tar.pack(buildFilePath);
+
+                    const stream = await buildDockerImage({
+                        docker,
+                        buildContext,
+                        imageName,
+                        dockerFile: "Dockerfile",
+                        buildArgs: dynamicBuildArgs
+                    });
+
+                    await dockerProgress(
+                        docker,
+                        stream,
+                        logger
+                    )
+
+                    if (projectData.type === 'static') {
+
+                        await logger.writeLine('spinning up container');
+
+                        const container = await docker.createContainer({
+                            Image: imageName
+                        });
+
+                        let archiveStream;
+                        try {
+                            archiveStream = await container.getArchive({
+                                path: `/app/${projectData.publishDir}`
+                            })
+                        } catch (error) {
+                            await logger.writeLine(`invalid PublishDir! ${projectData.publishDir}, "please check your Settings`);
+                            throw error;
+                        }
+
+                        const tarFile = path.join(
+                            buildFilePath,
+                            'artifact.tar'
+                        );
+
+                        await new Promise((resolve, reject) => {
+
+                            const writeStream = fs.createWriteStream(tarFile);
+
+                            archiveStream.pipe(writeStream);
+
+                            writeStream.on('finish', resolve);
+                            writeStream.on('error', reject);
+                        });
+
+                        const extractedDir = path.join(
+                            buildFilePath,
+                            'publish'
+                        );
+
+                        fs.mkdirSync(
+                            extractedDir,
+                            { recursive: true }
+                        );
+
+                        await maintar.extract({
+                            file: tarFile,
+                            cwd: extractedDir
+                        });
+
+                        await logger.writeLine('creating zip archive')
+
+                        const zipPath = path.join(
+                            buildFilePath,
+                            'build.zip'
+                        );
+
+                        await createZip(
+                            path.join(
+                                extractedDir,
+                                projectData.publishDir
+                            ),
+                            zipPath
+                        );
+
+                        await logger.writeLine('zip created')
+
+                        await logger.writeLine('zip archive created');
+
+                        await container.remove({
+                            force: true
+                        });
+
+                        await logger.writeLine('cleaning up container');
+
+                        await docker.getImage(imageName).remove({
+                            force: true
+                        });
+
+                    } else {
+
+                        const pushStream = await pushDockerImage({
+                            docker,
+                            imageName,
+                            username: dockerUsername,
+                            password: dockerPassword
+                        });
+
+                        await dockerProgress(
+                            docker,
+                            pushStream,
+                            logger
+                        );
+                    }
+
+                    buildStatus = 'success';
+
+                    finishedAt = new Date();
                 }
             }
 
 
 
         } catch (err) {
+            if (logger) {
+                await logger.writeLine(`[ERROR] ${err.message}`);
+            }
             console.error("Error processing message:", err);
+        } finally {
+            if (logger) {
+                try {
+                    const logArtifact = await logger.finish(buildStatus);
+                    logsUrl = await uploadLog({
+                        filePath: logArtifact.logFilePath,
+                        buildFileName: `${buildId.log}`,
+                        projectId: logArtifact.projectId,
+                    });
+
+                    if (logsUrl) {
+                        console.info(`[build-worker] Build ${logArtifact.buildId} logs uploaded: ${logsUrl}`);
+                    } else {
+                        console.warn(`[build-worker] Build ${logArtifact.buildId} logs saved locally, but upload did not return a URL.`);
+                    }
+                } catch (logError) {
+                    console.error('[build-worker] Could not finalize build logs:', logError);
+                }
+            }
         }
     });
 }
