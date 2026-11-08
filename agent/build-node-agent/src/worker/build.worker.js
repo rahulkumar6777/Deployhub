@@ -317,6 +317,20 @@ export const globalBuildSheduler = async () => {
                     console.error('[build-worker] Could not finalize build logs:', logError);
                 }
             }
+
+            await channel.sendToQueue(QUEUE_NAMES.BUILD_STATUS_QUEUE, Buffer.from(JSON.stringify({ startedAt, finishedAt, projectId, status: buildStatus, logsUrl })), {
+                persistent: true
+            });
+
+            if (
+                buildFilePath &&
+                fs.existsSync(buildFilePath)
+            ) {
+                fs.rmSync(buildFilePath, {
+                    recursive: true,
+                    force: true
+                });
+            }
         }
     });
 }
