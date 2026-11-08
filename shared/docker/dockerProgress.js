@@ -5,28 +5,41 @@ export const dockerProgress = (
 ) => {
 
     return new Promise((resolve, reject) => {
+        let pendingLogWrites = Promise.resolve();
+        let progressError = null;
 
         docker.modem.followProgress(
             stream,
-            (err, res) =>
-                err ? reject(err) : resolve(res),
+            async (err, res) => {
+                try {
+                    await pendingLogWrites;
+                } catch (logError) {
+                    reject(logError);
+                    return;
+                }
+
+                if (err || progressError) {
+                    reject(err || progressError);
+                    return;
+                }
+
+                resolve(res);
+            },
 
             (event) => {
 
                 if (event.stream) {
                     process.stdout.write(event.stream);
-
-                    logger?.write(event.stream);
+                    if (logger) {
+                        pendingLogWrites = pendingLogWrites.then(() => logger.write(event.stream));
+                    }
                 }
 
                 if (event.error) {
-                    logger?.write(
-                        `[ERROR] ${event.error}`
-                    );
-
-                    reject(
-                        new Error(event.error)
-                    );
+                    progressError = new Error(event.error);
+                    if (logger) {
+                        pendingLogWrites = pendingLogWrites.then(() => logger.writeLine(`[ERROR] ${event.error}`));
+                    }
                 }
             }
         );

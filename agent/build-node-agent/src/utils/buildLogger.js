@@ -52,6 +52,14 @@ export class BuildLogger {
         }
     }
 
+    async writeLine(line) {
+        if (this.pending.trim()) {
+            await this.#writeLine(this.pending);
+            this.pending = '';
+        }
+        await this.#writeLine(String(line ?? ''));
+    }
+
     async #writeLine(rawLine) {
         const line = rawLine.trimEnd();
         if (!line.trim() || ignorePatterns.some((pattern) => pattern.test(line))) return;
