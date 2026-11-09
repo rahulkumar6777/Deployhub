@@ -5,7 +5,6 @@ export const QUEUE_NAMES = {
     BUILD_NODE: (nodeId) => `deployhub-build-${nodeId}`,
     DEPLOY_NODE: (nodeId) => `deployhub-deploy-${nodeId}`,
     BUILD_STATUS_QUEUE: "deployhub-build-status-updates",
-    DEPLOY_STATUS_QUEUE: "deployhub-deploy-status-updates",
-    BUILD_DATA_UPDATE_QUEUE: "deployhub-build-data-update",
-    DEPLOY_DATA_UPDATE_QUEUE: "deployhub-deploy-data-update",
+    PROJECT_STATUS_UPDATE_QUEUE: "deployhub-project-status-updates",
+    DEPLOY_STATUS_QUEUE: "deployhub-deploy-status-updates"
 };
