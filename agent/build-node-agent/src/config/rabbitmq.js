@@ -51,6 +51,8 @@ export const connectRabbitMQ = async () => {
             }
         );
 
+        await channel.assertQueue(QUEUE_NAMES.GLOBAL, { durable: true });
+
         await channel.assertQueue(
             QUEUE_NAMES.BUILD_STATUS_QUEUE,
             {
