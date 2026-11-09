@@ -21,6 +21,7 @@ import * as maintar from 'tar';
 import { pushDockerImage } from "../../../../shared/docker/pushImage.js";
 import { BuildLogger } from "../utils/buildLogger.js";
 import { uploadLog } from "../utils/uploader.js";
+import { createZip } from "../utils/createZip.js";
 
 
 export const globalBuildSheduler = async () => {
