@@ -26,7 +26,8 @@ const buildSchema = new mongoose.Schema({
     startedAt: Date,
     finishedAt: Date,
     dockerImage: String,
-    logUrl: String
+    logUrl: String,
+    artifactUrl: String,
 
 }, { timestamps: true });
 
