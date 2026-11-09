@@ -2,10 +2,11 @@ import express from "express";
 import { buildEnv } from "./lib/env.js";
 import { connectDb, closeDb } from "./core/db/mongo.js";
 import { connectRedis } from "./core/redis/client.js";
-import { connectRabbitMQ, closeRabbitMQ } from "./core/message-broker/rabbitmq.js";
+import { connectRabbitMQ, closeRabbitMQ, onRabbitReady } from "./core/message-broker/rabbitmq.js";
 import { createShutdownHandler } from "../../../shared/utils/gracefulShutdown.js";
 import { createInternalAUthMiddleware } from "../../../shared/middlewares/internalAuth.js";
 import { print } from "../../../shared/utils/print.js";
+import { startBuildStatusConsumer } from "./workers/buildStatus.worker.js";
 
 
 const app = express();
@@ -64,6 +65,8 @@ export default async function startApp(port, service_name) {
     const server = app.listen(port, () => {
         console.log(`${service_name} running on port ${port}`);
     });
+
+    onRabbitReady(startBuildStatusConsumer);
 
     const shutdown = createShutdownHandler({
         server,

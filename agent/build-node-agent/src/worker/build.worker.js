@@ -351,7 +351,9 @@ export const globalBuildSheduler = async () => {
             }
 
             if (buildId && projectId) {
+
                 const terminalStatus = buildStatus === 'success' ? buildAndDeployStatusForQueues.build['build-completed'] : buildAndDeployStatusForQueues.build['build-failed'];
+                
                 const statusPayload = {
                     event: 'BUILD',
                     buildId,
@@ -375,15 +377,11 @@ export const globalBuildSheduler = async () => {
                         console.warn('[build-worker] Could not publish terminal status to Redis:', redisError.message);
                     }
 
-                    await channel.sendToQueue(
-                        QUEUE_NAMES.BUILD_STATUS_QUEUE,
-                        Buffer.from(JSON.stringify(statusPayload)),
+                    await channel.sendToQueue(QUEUE_NAMES.BUILD_STATUS_QUEUE, Buffer.from(JSON.stringify(statusPayload)),
                         { persistent: true, contentType: 'application/json' },
                     );
 
-                    await channel.sendToQueue(
-                        QUEUE_NAMES.GLOBAL,
-                        Buffer.from(JSON.stringify({ ...statusPayload, status: terminalStatus })),
+                    await channel.sendToQueue(QUEUE_NAMES.GLOBAL, Buffer.from(JSON.stringify({ ...statusPayload, status: terminalStatus })),
                         { persistent: true, contentType: 'application/json' },
                     );
 
