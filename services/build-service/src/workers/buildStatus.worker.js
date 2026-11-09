@@ -7,7 +7,7 @@ export const startBuildStatusConsumer = async (channel) => {
 
         try {
             const payload = JSON.parse(msg.content.toString());
-            const { buildId, status, startedAt, finishedAt, logUrl, artifactUrl, commitSha } = payload;
+            const { buildId, status, startedAt, finishedAt, logUrl, artifactUrl, commitSha, dockerImage } = payload;
 
 
             if (!buildId) {
@@ -23,6 +23,7 @@ export const startBuildStatusConsumer = async (channel) => {
             if (logUrl) update.logUrl = logUrl;
             if (artifactUrl) update.artifactUrl = artifactUrl;
             if (commitSha) update.commitSha = commitSha;
+            if (dockerImage) update.dockerImage = dockerImage;
 
             await Build.findByIdAndUpdate(buildId, { $set: update }, { runValidators: true });
             channel.ack(msg);

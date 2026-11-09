@@ -1,18 +1,21 @@
 import { Build } from '../models/build.model.js';
-import { AppError } from '../../../../shared/errors/AppError.js';
 
 
 export const createBuildService = async (data) => {
 
-    const { projectId, userId, projectName } = data;
+    const { projectId, userId, projectName, expire = false, expiresInSeconds = 7200 } = data;
+
+    const expiresAt = expire
+        ? new Date(Date.now() + Number(expiresInSeconds) * 1000)
+        : undefined;
 
     const build = await Build.create({
         userId,
-        project: projectId,
+        ...(projectId && { project: projectId }),
         projectName,
-        status: 'pending'
+        status: 'pending',
+        ...(expiresAt && { expiresAt }),
     });
-    
 
     return { buildId: build._id }
 }
