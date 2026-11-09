@@ -29,6 +29,7 @@ const schema = z.object({
   ANALYTICS_SERVICE_PORT: z.coerce.number().default(4009),
   ADMIN_SERVICE_PORT: z.coerce.number().default(4010),
   AGENT_SERVICE_PORT: z.coerce.number().default(4011),
+  BUILD_NODE_AGENT_PORT: z.coerce.number().default(4522),
 
   REDIS_HOST: z.string(),
   REDIS_PORT: z.coerce.number(),
@@ -81,6 +82,7 @@ const schema = z.object({
   ANALYTICS_SERVICE_URL: z.string(),
   ADMIN_SERVICE_URL: z.string(),
   AGENT_SERVICE_URL: z.string(),
+  NODE_MANAGER_URL: z.string(),
 
 
   // Groq for dashboard AI agent — comma-separated keys
@@ -94,6 +96,8 @@ const schema = z.object({
   ADMIN_SESSION_SECRET: z.string().min(32),
 
   BCRYPT_ROUNDS: z.coerce.number().default(10),
+
+  NODE_SECRET: z.string().min(32),
 })
 
 const parsed = schema.safeParse(process.env);
