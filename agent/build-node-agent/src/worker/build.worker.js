@@ -58,11 +58,13 @@ export const globalBuildSheduler = async () => {
         let logger;
         let buildId;
         let projectId;
+        let content = {};
+        let commitSha;
         let logsUrl = null;
         let buildStatus = 'failed';
 
         try {
-            const content = JSON.parse(msg.content.toString());
+            content = JSON.parse(msg.content.toString());
             ({ buildId, projectId } = content);
             const { event, userId, projectName, firstTime, status, projectType, allocationId } = content;
 
@@ -71,10 +73,16 @@ export const globalBuildSheduler = async () => {
             startedAt = new Date();
 
 
-            await publishProjectStatus(redis, { projectId: projectId, status: 'building' })
-            await channel.sendToQueue(QUEUE_NAMES.BUILD_STATUS_QUEUE, Buffer.from(JSON.stringify({ projectId, status: 'building' })), {
-                persistent: true
-            });
+            try {
+                await publishProjectStatus(redis, { projectId, status: 'building' });
+            } catch (redisError) {
+                console.warn('[build-worker] Could not publish building status to Redis:', redisError.message);
+            }
+            await channel.sendToQueue(
+                QUEUE_NAMES.BUILD_STATUS_QUEUE,
+                Buffer.from(JSON.stringify({ buildId, projectId, status: 'building', startedAt })),
+                { persistent: true, contentType: 'application/json' },
+            );
 
             // here i make docker image name
             imageName = `${dockerUsername}/${projectId.toString().toLowerCase()}:${buildId.toString().toLowerCase()}`;
@@ -102,7 +110,7 @@ export const globalBuildSheduler = async () => {
                     userGithubAcessToken = await getUserGithubAccessToken(axios, envs.IDENTITY_SERVICE_URL, userId, envs.INTERNAL_SERVICE_TALKING_SECRET, envs.INTERNAL_SECRET)
 
                     // here fetch commitsha
-                    const commitSha = await fetchCommitSha(projectData.repoUrl, projectData.branch, userGithubAcessToken);
+                    commitSha = await fetchCommitSha(projectData.repoUrl, projectData.branch, userGithubAcessToken);
 
                     // build filepath
                     buildFilePath = path.resolve(baserepopath, buildId.toString());
@@ -158,10 +166,10 @@ export const globalBuildSheduler = async () => {
                     // yeha pe docker file likha ja raha hai , based on proejct type
                     const dockerfileContent =
                         generateDockerfile({
-                            projectType: project.type,
-                            version: project.version,
-                            buildCommand: project?.buildCommand,
-                            startCommand: project?.startCommand
+                            projectType: projectData.type,
+                            version: projectData.version,
+                            buildCommand: projectData.buildCommand,
+                            startCommand: projectData.startCommand
                         });
 
                     // and yeha pe jo buildfilepath hai uske dockerfike copy ho raha hai
@@ -287,7 +295,6 @@ export const globalBuildSheduler = async () => {
 
                     buildStatus = 'success';
 
-                    finishedAt = new Date();
                 }
             }
 
@@ -299,12 +306,14 @@ export const globalBuildSheduler = async () => {
             }
             console.error("Error processing message:", err);
         } finally {
+            finishedAt = new Date();
+
             if (logger) {
                 try {
                     const logArtifact = await logger.finish(buildStatus);
                     logsUrl = await uploadLog({
                         filePath: logArtifact.logFilePath,
-                        buildFileName: `${buildId.log}`,
+                        buildFileName: logArtifact.fileName,
                         projectId: logArtifact.projectId,
                     });
 
@@ -318,18 +327,68 @@ export const globalBuildSheduler = async () => {
                 }
             }
 
-            await channel.sendToQueue(QUEUE_NAMES.BUILD_STATUS_QUEUE, Buffer.from(JSON.stringify({ startedAt, finishedAt, projectId, status: buildStatus, logsUrl })), {
-                persistent: true
-            });
+            if (buildId && projectId) {
+                const terminalStatus = buildStatus === 'success'
+                    ? buildAndDeployStatusForQueues.build['build-completed']
+                    : buildAndDeployStatusForQueues.build['build-failed'];
+                const statusPayload = {
+                    event: 'BUILD',
+                    buildId,
+                    projectId,
+                    userId: content.userId,
+                    projectName: content.projectName,
+                    projectType: content.projectType || projectData?.type,
+                    allocationId: content.allocationId,
+                    commitSha,
+                    startedAt,
+                    finishedAt,
+                    status: buildStatus,
+                    logUrl: logsUrl,
+                };
+
+                try {
+                    try {
+                        await publishProjectStatus(redis, { projectId, status: buildStatus });
+                    } catch (redisError) {
+                        console.warn('[build-worker] Could not publish terminal status to Redis:', redisError.message);
+                    }
+
+                    await channel.sendToQueue(
+                        QUEUE_NAMES.BUILD_STATUS_QUEUE,
+                        Buffer.from(JSON.stringify(statusPayload)),
+                        { persistent: true, contentType: 'application/json' },
+                    );
+
+                    // The node manager consumes terminal build events from GLOBAL
+                    // to release the build allocation and schedule deployment.
+                    await channel.sendToQueue(
+                        QUEUE_NAMES.GLOBAL,
+                        Buffer.from(JSON.stringify({ ...statusPayload, status: terminalStatus })),
+                        { persistent: true, contentType: 'application/json' },
+                    );
+
+                    channel.ack(msg);
+                } catch (statusError) {
+                    console.error('[build-worker] Could not publish terminal build status:', statusError);
+                    channel.nack(msg, false, true);
+                }
+            } else {
+                // Invalid messages cannot be retried usefully without build IDs.
+                channel.ack(msg);
+            }
 
             if (
                 buildFilePath &&
                 fs.existsSync(buildFilePath)
             ) {
-                fs.rmSync(buildFilePath, {
-                    recursive: true,
-                    force: true
-                });
+                try {
+                    fs.rmSync(buildFilePath, {
+                        recursive: true,
+                        force: true
+                    });
+                } catch (cleanupError) {
+                    console.error('[build-worker] Could not clean build directory:', cleanupError.message);
+                }
             }
         }
     });
