@@ -44,18 +44,8 @@ export const createProject = async (req, res) => {
             })
         }
 
-        await publishGlobal({
-            event: "BUILD",
-            status: buildAndDeployStatusForQueues.build["build-requested"],
-            buildId,
-            projectType: project.type,
-            ...data,
-            firstTime: true
-        });
-
         const redisclient = getRedis();
         await publishProjectStatus(redisclient, { projectId: project._id, status: 'queued' });
-
 
         await Project.findByIdAndUpdate(
             project._id,
@@ -64,6 +54,15 @@ export const createProject = async (req, res) => {
                 $inc: { totalBuilds: 1 }
             }
         );
+
+        await publishGlobal({
+            event: "BUILD",
+            status: buildAndDeployStatusForQueues.build["build-requested"],
+            buildId,
+            projectType: project.type,
+            ...data,
+            firstTime: true
+        });
 
         return res.status(201).json({
             success: true,

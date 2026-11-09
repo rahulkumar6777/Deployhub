@@ -514,6 +514,8 @@ export const initPaidProjectPayment = async (
             'pending'
     });
 
+    
+
 
     return {
         order,
@@ -535,12 +537,11 @@ export const verifyPaidProjectPayment = async (
     } = body;
 
 
-    const pendingOrder =
-        await PendingOrder.findOne({
-            userId,
-            orderId,
-            status: 'pending'
-        });
+    const pendingOrder = await PendingOrder.findOne({
+        userId,
+        orderId,
+        status: { $in: ['pending', 'completed'] },
+    });
 
 
     if (!pendingOrder) {
@@ -571,69 +572,66 @@ export const verifyPaidProjectPayment = async (
         );
     }
 
+    if (pendingOrder.status === 'completed') {
+        const project = await Project.findById(pendingOrder.projectId);
+        const order = await CompletedOrder.findOne({ userId, orderId });
+        if (!project || !order) {
+            throw new AppError('Verified payment record is incomplete', 409);
+        }
 
-    const { project } =
-        await createProjectForPlan(
+        return {
+            project,
+            order,
+            buildId: pendingOrder.buildId,
+            pendingOrder,
+            alreadyProcessed: true,
+        };
+    }
+
+    let project = pendingOrder.projectId
+        ? await Project.findById(pendingOrder.projectId)
+        : null;
+
+    if (!project) {
+        ({ project } = await createProjectForPlan(
             userId,
             pendingOrder.projectData,
             {
-                planName:
-                    pendingOrder.plan,
+                planName: pendingOrder.plan,
+                paymentStatus: 'paid',
+                months: pendingOrder.months,
+            },
+        ));
+        pendingOrder.projectId = project._id;
+        await pendingOrder.save();
+    }
 
-                paymentStatus:
-                    'paid',
-
-                months:
-                    pendingOrder.months
-            }
-        );
-
-
-    const completedOrder =
-        await CompletedOrder.create({
+    let completedOrder = await CompletedOrder.findOne({ userId, orderId });
+    if (!completedOrder) {
+        completedOrder = await CompletedOrder.create({
             userId,
-
             orderId,
-
-            razorpayPaymentId:
-                paymentId,
-
-            razorpaySignature:
-                signature,
-
-            months:
-                pendingOrder.months,
-
-            amount:
-                pendingOrder.amount,
-
-            plan:
-                pendingOrder.plan,
-
-            projectId:
-                project._id,
-
-            status:
-                'completed'
+            razorpayPaymentId: paymentId,
+            razorpaySignature: signature,
+            months: pendingOrder.months,
+            amount: pendingOrder.amount,
+            plan: pendingOrder.plan,
+            projectId: project._id,
+            status: 'completed',
         });
+    }
 
-
-    project.paymentId =
-        completedOrder._id;
-
-    await project.save({
-        validateBeforeSave: false
-    });
-
-
-    pendingOrder.status =
-        'completed';
-
-    await pendingOrder.save();
+    if (String(project.paymentId || '') !== String(completedOrder._id)) {
+        project.paymentId = completedOrder._id;
+        await project.save({ validateBeforeSave: false });
+    }
 
 
     return {
         project,
-        order: completedOrder
+        order: completedOrder,
+        buildId: pendingOrder.buildId,
+        pendingOrder,
+        alreadyProcessed: false,
     };
 };

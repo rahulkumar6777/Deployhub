@@ -17,6 +17,10 @@ const pendingorderschema = new mongoose.Schema({
         ref: "Project",
         index: true
     },
+    buildId: {
+        type: mongoose.Schema.Types.ObjectId,
+        index: true,
+    },
     projectData: {
         type: mongoose.Schema.Types.Mixed,
         required: true
