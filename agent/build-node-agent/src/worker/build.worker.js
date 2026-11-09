@@ -20,7 +20,7 @@ import { buildDockerImage } from "../../../../shared/docker/buildImage.js";
 import * as maintar from 'tar';
 import { pushDockerImage } from "../../../../shared/docker/pushImage.js";
 import { BuildLogger } from "../utils/buildLogger.js";
-import { uploadLog } from "../utils/uploader.js";
+import { uploadBuildArtifact, uploadLog } from "../utils/uploader.js";
 import { createZip } from "../utils/createZip.js";
 
 const removeBuildDirectory = async (directoryPath) => {
@@ -69,6 +69,7 @@ export const globalBuildSheduler = async () => {
         let content = {};
         let commitSha;
         let logsUrl = null;
+        let artifactUrl = null;
         let buildStatus = 'failed';
 
         try {
@@ -278,8 +279,6 @@ export const globalBuildSheduler = async () => {
 
                         await logger.writeLine('zip created')
 
-                        await logger.writeLine('zip archive created');
-
                         await container.remove({
                             force: true
                         });
@@ -289,6 +288,17 @@ export const globalBuildSheduler = async () => {
                         await docker.getImage(imageName).remove({
                             force: true
                         });
+
+                        artifactUrl = await uploadBuildArtifact({
+                            filePath: zipPath,
+                            buildFileName: `${buildId}.zip`,
+                            projectId,
+                        });
+                        if (!artifactUrl) {
+                            throw new Error('Static build ZIP could not be uploaded to DomainDrop');
+                        }
+
+                        await logger.writeLine('static build ZIP uploaded to DomainDrop');
 
                     } else {
 
@@ -355,6 +365,7 @@ export const globalBuildSheduler = async () => {
                     finishedAt,
                     status: buildStatus,
                     logUrl: logsUrl,
+                    artifactUrl,
                 };
 
                 try {
