@@ -23,6 +23,15 @@ import { BuildLogger } from "../utils/buildLogger.js";
 import { uploadLog } from "../utils/uploader.js";
 import { createZip } from "../utils/createZip.js";
 
+const removeBuildDirectory = async (directoryPath) => {
+    await fs.promises.rm(directoryPath, {
+        recursive: true,
+        force: true,
+        maxRetries: 5,
+        retryDelay: 500,
+    });
+};
+
 
 export const globalBuildSheduler = async () => {
 
@@ -51,8 +60,6 @@ export const globalBuildSheduler = async () => {
 
         // ye buildfilepath ka pura folder path hai
         let buildFilePath;
-
-        let logsFile;
 
         let startedAt;
         let finishedAt;
@@ -106,7 +113,7 @@ export const globalBuildSheduler = async () => {
                     });
 
                     projectData = rawData.data.projectData;
-                    console.log(projectData);
+                    await logger.writeLine(`Project loaded: ${projectData.name || projectId}`);
 
                     userGithubAcessToken = await getUserGithubAccessToken(axios, envs.IDENTITY_SERVICE_URL, userId, envs.INTERNAL_SERVICE_TALKING_SECRET, envs.INTERNAL_SECRET)
 
@@ -114,15 +121,20 @@ export const globalBuildSheduler = async () => {
                     commitSha = await fetchCommitSha(projectData.repoUrl, projectData.branch, userGithubAcessToken);
 
                     // build filepath
-                    buildFilePath = path.resolve(baserepopath, buildId.toString());
+                    buildFilePath = path.resolve(baserepopath, String(buildId));
 
-                    // check build se bahar na jaye user
-                    if (!buildFilePath.startsWith(baserepopath)) {
+                    const relativeBuildPath = path.relative(baserepopath, buildFilePath);
+                    if (
+                        !relativeBuildPath ||
+                        relativeBuildPath === '..' ||
+                        relativeBuildPath.startsWith(`..${path.sep}`) ||
+                        path.isAbsolute(relativeBuildPath)
+                    ) {
                         throw new Error('Invalid build path');
                     }
 
-                    // yeha pe agar buildFilePath nhi hai to create ho jayega
-                    if (!fs.existsSync(buildFilePath)) fs.mkdirSync(buildFilePath, { recursive: true });
+                    // Retries can reuse a buildId whose previous workspace was left behind.
+                    await removeBuildDirectory(buildFilePath);
 
                     let dynamicBuildArgs = {};
 
@@ -329,9 +341,7 @@ export const globalBuildSheduler = async () => {
             }
 
             if (buildId && projectId) {
-                const terminalStatus = buildStatus === 'success'
-                    ? buildAndDeployStatusForQueues.build['build-completed']
-                    : buildAndDeployStatusForQueues.build['build-failed'];
+                const terminalStatus = buildStatus === 'success' ? buildAndDeployStatusForQueues.build['build-completed'] : buildAndDeployStatusForQueues.build['build-failed'];
                 const statusPayload = {
                     event: 'BUILD',
                     buildId,
@@ -360,8 +370,6 @@ export const globalBuildSheduler = async () => {
                         { persistent: true, contentType: 'application/json' },
                     );
 
-                    // The node manager consumes terminal build events from GLOBAL
-                    // to release the build allocation and schedule deployment.
                     await channel.sendToQueue(
                         QUEUE_NAMES.GLOBAL,
                         Buffer.from(JSON.stringify({ ...statusPayload, status: terminalStatus })),
@@ -383,10 +391,7 @@ export const globalBuildSheduler = async () => {
                 fs.existsSync(buildFilePath)
             ) {
                 try {
-                    fs.rmSync(buildFilePath, {
-                        recursive: true,
-                        force: true
-                    });
+                    await removeBuildDirectory(buildFilePath);
                 } catch (cleanupError) {
                     console.error('[build-worker] Could not clean build directory:', cleanupError.message);
                 }
