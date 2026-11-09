@@ -88,6 +88,11 @@ export const globalBuildSheduler = async () => {
                 console.warn('[build-worker] Could not publish building status to Redis:', redisError.message);
             }
             await channel.sendToQueue(
+                QUEUE_NAMES.PROJECT_STATUS_UPDATE_QUEUE,
+                Buffer.from(JSON.stringify({ projectId, status: 'building' })),
+                { persistent: true, contentType: 'application/json' },
+            );
+            await channel.sendToQueue(
                 QUEUE_NAMES.BUILD_STATUS_QUEUE,
                 Buffer.from(JSON.stringify({ buildId, projectId, status: 'building', startedAt })),
                 { persistent: true, contentType: 'application/json' },
@@ -353,6 +358,7 @@ export const globalBuildSheduler = async () => {
             if (buildId && projectId) {
 
                 const terminalStatus = buildStatus === 'success' ? buildAndDeployStatusForQueues.build['build-completed'] : buildAndDeployStatusForQueues.build['build-failed'];
+                const projectStatus = buildStatus === 'success' ? 'deploying' : 'build-failed';
                 
                 const statusPayload = {
                     event: 'BUILD',
@@ -366,18 +372,26 @@ export const globalBuildSheduler = async () => {
                     startedAt,
                     finishedAt,
                     status: buildStatus,
+                    projectStatus,
                     logUrl: logsUrl,
                     artifactUrl,
+                    dockerImage: imageName
                 };
 
                 try {
                     try {
-                        await publishProjectStatus(redis, { projectId, status: buildStatus });
+                        await publishProjectStatus(redis, { projectId, status: projectStatus });
                     } catch (redisError) {
                         console.warn('[build-worker] Could not publish terminal status to Redis:', redisError.message);
                     }
 
                     await channel.sendToQueue(QUEUE_NAMES.BUILD_STATUS_QUEUE, Buffer.from(JSON.stringify(statusPayload)),
+                        { persistent: true, contentType: 'application/json' },
+                    );
+
+                    await channel.sendToQueue(
+                        QUEUE_NAMES.PROJECT_STATUS_UPDATE_QUEUE,
+                        Buffer.from(JSON.stringify({ projectId, status: projectStatus })),
                         { persistent: true, contentType: 'application/json' },
                     );
 
