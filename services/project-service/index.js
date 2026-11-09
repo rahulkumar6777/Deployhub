@@ -4,7 +4,7 @@ import { createInternalAUthMiddleware } from "../../shared/middlewares/internalA
 import { createShutdownHandler } from "../../shared/utils/gracefulShutdown.js";
 import { env } from "./src/lib/env.js";
 import { connectRedis, closeRedis } from "./src/core/redis/client.js";
-import { connectRabbitMQ } from "./src/config/message-broker/rabbitmq.js";
+import { connectRabbitMQ, onRabbitReady } from "./src/config/message-broker/rabbitmq.js";
 
 
 const app = express();
@@ -61,6 +61,7 @@ app.use(userContext);
 
 
 import projectRouter from './src/routes/projectRouter.route.js';
+import { startProjectStatusConsumer } from "./src/workers/buildStatus.worker.js";
 app.use('/', projectRouter);
 
 app.use((_req, res) => {
@@ -77,6 +78,7 @@ export default async function startApp(port) {
 
     await connectRedis();
     await connectDb();
+    onRabbitReady(startProjectStatusConsumer);
     await connectRabbitMQ();
 
 
