@@ -1,42 +1,95 @@
 import amqp from "amqplib";
-import { envs } from "../lib/env.js";
 import { QUEUE_NAMES } from "../../../../shared/queues/queueNames.js";
+import { envs } from "../lib/env.js";
 
 let connection;
 let channel;
+let shuttingDown = false;
+let reconnectTimer = null;
+const onReadyCallbacks = [];
+
+
+export const onRabbitReady = (cb) => {
+    onReadyCallbacks.push(cb);
+    if (channel) cb(channel);
+};
+
+const scheduleReconnect = () => {
+    if (shuttingDown || reconnectTimer) return;
+    reconnectTimer = setTimeout(() => {
+        reconnectTimer = null;
+        connectRabbitMQ();
+    }, 5000);
+};
 
 export const connectRabbitMQ = async () => {
-    connection = await amqp.connect(
-        envs.RABBIT_MQ_URL
-    );
+    try {
+        connection = await amqp.connect(envs.RABBIT_MQ_URL, { heartbeat: 30 });
 
-    channel = await connection.createChannel();
+        connection.on("error", (err) => {
+            console.error("RabbitMQ error:", err.message);
+        });
 
-    // global build and deploy task shedular
-    await channel.assertQueue(
-        QUEUE_NAMES.BUILD_NODE(process.env.NODE_ID),
-        {
-            durable: true,
+        connection.on("close", () => {
+            channel = null;
+            if (shuttingDown) return;
+            console.error("RabbitMQ closed, reconnecting in 5s...");
+            scheduleReconnect();
+        });
+
+        channel = await connection.createChannel();
+
+        channel.on("error", (err) => {
+            console.error("RabbitMQ channel error:", err.message);
+        });
+
+        // global build and deploy task shedular
+        await channel.assertQueue(
+            QUEUE_NAMES.BUILD_NODE(process.env.NODE_ID),
+            {
+                durable: true,
+            }
+        );
+
+        await channel.assertQueue(QUEUE_NAMES.GLOBAL, { durable: true });
+
+        await channel.assertQueue(
+            QUEUE_NAMES.BUILD_STATUS_QUEUE,
+            {
+                durable: true,
+            }
+        );
+
+        await channel.assertQueue(QUEUE_NAMES.PROJECT_STATUS_UPDATE_QUEUE, { durable: true });
+
+        await channel.assertQueue(QUEUE_NAMES.BUILD_DATA_UPDATE_QUEUE, { durable: true });
+
+        for (const cb of onReadyCallbacks) {
+            await cb(channel);
         }
-    );
+
+        console.log("RabbitMQ connected");
+    } catch (err) {
+        console.error("RabbitMQ connect failed:", err.message);
+        channel = null;
+        scheduleReconnect();
+    }
 };
 
 export const getChannel = () => {
     if (!channel) {
-        throw new Error(
-            "RabbitMQ channel not initialized"
-        );
+        throw new Error("RabbitMQ channel not initialized");
     }
-
     return channel;
 };
 
 export const closeRabbitMQ = async () => {
-    if (channel) {
-        await channel.close();
-    }
-
-    if (connection) {
-        await connection.close();
+    shuttingDown = true;
+    clearTimeout(reconnectTimer);
+    try {
+        if (channel) await channel.close();
+        if (connection) await connection.close();
+    } catch (err) {
+        console.error("RabbitMQ close error:", err.message);
     }
 };

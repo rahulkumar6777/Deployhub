@@ -2,12 +2,12 @@ import { domainDropFilesPathKey } from "./filesPathkey.js"
 import { progressLogger } from "./uploadProgress.js"
 
 
-export const uplaodFileOnDomainDrop = async ({ domainDrop, DomainDropError, spaceId, file, filename, mimeType, label, userId }) => {
+export const uplaodFileOnDomainDrop = async ({ domainDrop, DomainDropError, spaceId, file, filename, mimeType, label, userId, path }) => {
     try {
 
         const res = await domainDrop.files.upload({
             spaceId: spaceId,
-            path: domainDropFilesPathKey.profilePic(filename, userId),
+            path,
             file: file,
             mimeType: mimeType,
             concurrency: 4,

@@ -65,10 +65,11 @@ export const getChannel = () => {
     return channel;
 };
 
-export const ensureNodeQueues = async (nodeId) => {
+export const ensureNodeQueues = async (type, nodeId) => {
     const ch = getChannel();
-    await ch.assertQueue(QUEUE_NAMES.BUILD_NODE(nodeId), { durable: true });
-    await ch.assertQueue(QUEUE_NAMES.DEPLOY_NODE(nodeId), { durable: true });
+    type === "build"
+        ? await ch.assertQueue(QUEUE_NAMES.BUILD_NODE(nodeId), { durable: true })
+        : await ch.assertQueue(QUEUE_NAMES.DEPLOY_NODE(nodeId), { durable: true });
 };
 
 export const publishToNode = async (type, nodeId, payload) => {
@@ -78,7 +79,7 @@ export const publishToNode = async (type, nodeId, payload) => {
             ? QUEUE_NAMES.BUILD_NODE(nodeId)
             : QUEUE_NAMES.DEPLOY_NODE(nodeId);
 
-    await ensureNodeQueues(nodeId);
+    await ensureNodeQueues(type, nodeId);
     ch.sendToQueue(queue, Buffer.from(JSON.stringify(payload)), {
         persistent: true,
     });

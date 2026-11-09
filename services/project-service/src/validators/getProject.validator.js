@@ -1,7 +1,7 @@
-import { body } from "express-validator";
+import { param } from "express-validator";
 
 export const getProjectValidator = [
-    body("projectId")
+    param("projectId")
         .notEmpty()
         .withMessage("ProjectId is requied")
         .isMongoId()

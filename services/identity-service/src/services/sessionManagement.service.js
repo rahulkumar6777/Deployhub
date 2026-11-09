@@ -76,3 +76,18 @@ export const revokeAllSessions = async ({ userId }) => {
 
     return true;
 };
+
+
+export const revokeOtherSessions = async ({ userId, currentTokenId }) => {
+    const redis = getRedis();
+    const keys = await scanSessionKeys(redis, userId);
+    const otherSessionKeys = keys.filter((key) =>
+        getTokenIdFromKey(key) !== currentTokenId
+    );
+
+    if (otherSessionKeys.length) {
+        await redis.del(...otherSessionKeys);
+    }
+
+    return true;
+};

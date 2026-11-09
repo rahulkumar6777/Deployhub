@@ -1,5 +1,5 @@
-import { AppError } from "../../../../shared/errors/AppError.js";
-import { Project } from "../models/project.model.js"
+import { AppError } from "../../../../../shared/errors/AppError.js";
+import { Project } from "../../models/project.model.js"
 
 export const getProjectService = async (projectId) => {
 

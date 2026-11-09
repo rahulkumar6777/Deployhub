@@ -15,7 +15,25 @@ const releaseNodeLock = `
 
 export const suggestNodeService = async (resources) => {
 
-    const { nodeType, cpuPercent = 0, memoryBytes = 0, storageBytes = 0 } = resources;
+    const requestedNodeType = resources?.nodeType;
+    const nodeTypeAliases = {
+        build: "build",
+        dynamic: "deploy-dynamic",
+        "deploy-dynamic": "deploy-dynamic",
+        static: "deploy-static",
+        "deploy-static": "deploy-static"
+    };
+    const nodeType = nodeTypeAliases[requestedNodeType];
+
+    if (!nodeType) {
+        throw new AppError("Invalid node type. Use build, dynamic, or static", 400);
+    }
+
+    const {
+        cpuPercent = 0,
+        memoryBytes = 0,
+        storageBytes = 0
+    } = resources;
     const redis = getRedis();
 
     const nodes = await Node.find({ status: "active", type: nodeType }).lean();
@@ -23,7 +41,6 @@ export const suggestNodeService = async (resources) => {
         throw new AppError("No active nodes found", 404);
     }
 
-    cacheKey
     for (const node of nodes) {
         const lockKey = cacheKey.nodelockKey(node.nodeId)
         const lockId = crypto.randomUUID();
@@ -33,13 +50,8 @@ export const suggestNodeService = async (resources) => {
         }
 
         try {
-            const nodeResources = await NodeResourceSnapshot.findOne({ nodeId: node.nodeId }).lean();
-            if (!nodeResources) {
-                continue;
-            }
-
-            const now = new Date();
             if (nodeType === "build") {
+                const now = new Date();
                 const activeBuilds = await NodeAllocation.countDocuments({
                     nodeId: node.nodeId,
                     nodeType: "build",
@@ -69,10 +81,37 @@ export const suggestNodeService = async (resources) => {
                 };
             }
 
+            if (nodeType === "deploy-static") {
+                const allocation = new NodeAllocation({
+                    nodeId: node.nodeId,
+                    nodeType,
+                    cpuPercent: 0,
+                    memoryBytes: 0,
+                    storageBytes: 0
+                });
+                await allocation.save();
+
+                return {
+                    allocationId: allocation._id,
+                    expiresAt: allocation.expiresAt,
+                    nodeId: node.nodeId,
+                    nodeUrl: node.nodeUrl,
+                    nodeIp: node.nodeIp
+                };
+            }
+
+            const nodeResources = await NodeResourceSnapshot.findOne({ nodeId: node.nodeId }).lean();
+            if (!nodeResources) {
+                continue;
+            }
+
+            const now = new Date();
+
             const allocations = await NodeAllocation.find({
                 nodeId: node.nodeId,
-                nodeType: "deploy",
+                nodeType: "deploy-dynamic",
                 $or: [
+                    { status: "completed" },
                     { status: "pending", expiresAt: { $gt: now } }
                 ]
             }).lean();

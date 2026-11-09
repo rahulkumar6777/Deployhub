@@ -1,6 +1,7 @@
 export const getFileUrlDomainDrop = async ({ domainDrop, fileId, DomainDropError }) => {
     try {
-        await domainDrop.files.getUrl(fileId, { expiresIn: 9000 })
+        const res = await domainDrop.files.getUrl(fileId, { expiresIn: 9000 })
+        return res;
     } catch (error) {
         if (error instanceof DomainDropError) {
             console.log({

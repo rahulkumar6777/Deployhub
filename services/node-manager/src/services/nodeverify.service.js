@@ -32,7 +32,7 @@ export const nodeVerifyService = async (nodeId, secret, resources) => {
 
     let snapshot;
 
-    if (node.type === 'deploy') {
+    if (node.type === 'deploy-dynamic') {
         if (!resources?.cpu || !resources?.memory || !resources?.disk) {
             throw new AppError("Node resources are required", 400);
         }

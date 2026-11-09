@@ -19,6 +19,7 @@ const IDENTITY_PUBLIC_ROUTES = new Map([
     ['/logut', new Set(['POST'])],
     ['/user/profile-pic', new Set(['PUT'])],
     ['/user/fullname', new Set(['PUT'])],
+    ['/user/password', new Set(['PUT'])],
     ['/user/repos', new Set(['GET'])],
     ['/resendotp', new Set(['POST'])],
     ['/user/me', new Set(['GET'])],

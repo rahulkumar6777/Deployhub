@@ -8,6 +8,7 @@ import { domainDrop } from "../../../../shared/domaindrop/domaindrop.js";
 import { env } from "../lib/env.js";
 import { deleteFromDomainDrop } from "../../../../shared/domaindrop/delete.js";
 import { getFileUrlDomainDrop } from "../../../../shared/domaindrop/getfileUrl.js";
+import { domainDropFilesPathKey } from "../../../../shared/domaindrop/filesPathkey.js";
 
 
 export const userFullnameService = async (userId, fullName) => {
@@ -24,6 +25,33 @@ export const userFullnameService = async (userId, fullName) => {
     return updatedUser
 
 }
+
+export const userPasswordService = async (userId, currentPassword, newPassword) => {
+    const user = await User.findById(userId).select('+password');
+
+    if (!user) {
+        throw new AppError('User not found', 404);
+    }
+
+    if (user.provider !== 'local') {
+        throw new AppError('Password updates are only available for local accounts', 409);
+    }
+
+    const passwordIsValid = await user.comparePassword(currentPassword);
+    if (!passwordIsValid) {
+        throw new AppError('Current password is incorrect', 400);
+    }
+
+    const isSamePassword = await user.comparePassword(newPassword);
+    if (isSamePassword) {
+        throw new AppError('New password must be different from your current password', 400);
+    }
+
+    user.password = newPassword;
+    await user.save();
+
+    return user;
+};
 
 export const userProfilePicService = async (userId, file) => {
 
@@ -53,14 +81,15 @@ export const userProfilePicService = async (userId, file) => {
         mimeType: file.mimetype,
         userId,
         spaceId: env.DOMAINDROP_SPACE_ID,
-        label: 'profile'
+        label: 'profile',
+        path: domainDropFilesPathKey.profilePic(file.filename, userId)
     });
 
     const profilePicUrl = await getFileUrlDomainDrop({ domainDrop: drop, fileId: uplaodResult.id, DomainDropError })
 
     const updateUser = await User.findOneAndUpdate(
         { _id: userId },
-        { profileFileId: uplaodResult.id, profilePic: profilePicUrl },
+        { profileFileId: uplaodResult.id, profilePic: profilePicUrl.url },
         { returnDocument: 'after', upsert: false }
     );
 

@@ -22,7 +22,8 @@ export const nodeVerify = async () => {
     );
 
     if (response.status !== 200) {
-        throw new Error(`Node verification failed with status ${response.status}`);
+        console.error(`Node verification failed with status ${response.status}`);
+        process.exit(1);
     }
 
     console.log("node verified")

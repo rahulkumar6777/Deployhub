@@ -2,15 +2,17 @@ import axios from "axios";
 import { createBuildInternalApiCall } from "../../../shared/internal-api/createBuild.js";
 import { env } from "../src/lib/env.js";
 
-export const createBuild = async (data, Project) => {
+export const createBuild = async (data, Project = null) => {
     const buildData = await createBuildInternalApiCall(axios, env.BUILD_SERVICE_URL, env.INTERNAL_SECRET, env.INTERNAL_SERVICE_TALKING_SECRET, data);
 
-    if (!buildData) {
+    if (!buildData?.success || !buildData?.data?.buildId) {
 
-        await Project.findByIdAndDelete(data.projectId);
+        if (Project && data.projectId) {
+            await Project.findByIdAndDelete(data.projectId);
+        }
 
         return {
-            success: "failed",
+            success: false,
             message: "build createtion failed due to build service is temperarily down, please try again later"
         }
     }

@@ -7,7 +7,7 @@ const nodeAllocationSchema = new mongoose.Schema({
     },
     nodeType: {
         type: String,
-        enum: ["build", "deploy"],
+        enum: ["build", "deploy-dynamic", "deploy-static"],
         required: true
     },
     cpuPercent: {

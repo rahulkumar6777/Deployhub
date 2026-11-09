@@ -7,7 +7,7 @@ const nodeSchema = new mongoose.Schema({
     },
     type: {
         type: String,
-        enum: ["build", "deploy"],
+        enum: ["build", "deploy-dynamic", "deploy-static"],
         required: true
     },
     region: {

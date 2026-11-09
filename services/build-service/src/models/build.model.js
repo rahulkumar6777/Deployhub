@@ -8,7 +8,6 @@ const buildSchema = new mongoose.Schema({
     },
     project: {
         type: mongoose.Schema.Types.ObjectId,
-        required: true,
         index: true
     },
     projectName: {
@@ -26,10 +25,13 @@ const buildSchema = new mongoose.Schema({
     startedAt: Date,
     finishedAt: Date,
     dockerImage: String,
-    logUrl: String
+    logUrl: String,
+    artifactUrl: String,
+    expiresAt: Date,
 
 }, { timestamps: true });
 
 buildSchema.index({ project: 1, createdAt: -1 });
+buildSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
 export const Build = mongoose.model("Build", buildSchema);

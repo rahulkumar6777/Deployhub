@@ -14,7 +14,7 @@ export const addNodeValidator = [
         .withMessage("nodetype is Required")
         .toLowerCase()
         .custom((value) => {
-            if (value !== 'build' & value !== 'deploy') {
+            if (!['build', 'deploy-dynamic', 'deploy-static'].includes(value)) {
                 throw new Error("invalid nodetype");
             }
             return true;
@@ -66,7 +66,7 @@ export const addNodeValidator = [
 
     body("cpuTotalPercent")
         .custom((value, { req }) => {
-            if (req.body.nodetype === "deploy") {
+            if (req.body.nodetype === "deploy-dynamic") {
                 if (value === undefined || value === null) {
                     throw new Error("CPU total percentage is required");
                 }
@@ -80,7 +80,7 @@ export const addNodeValidator = [
 
     body("memoryTotalBytes")
         .custom((value, { req }) => {
-            if (req.body.nodetype === "deploy") {
+            if (req.body.nodetype === "deploy-dynamic") {
                 if (value === undefined || value === null) {
                     throw new Error("Total memory is required");
                 }
@@ -94,7 +94,7 @@ export const addNodeValidator = [
 
     body("diskTotalBytes")
         .custom((value, { req }) => {
-            if (req.body.nodetype === "deploy") {
+            if (req.body.nodetype === "deploy-dynamic") {
                 if (value === undefined || value === null) {
                     throw new Error("Total disk size is required");
                 }

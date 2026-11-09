@@ -25,6 +25,7 @@ import {
   Search,
   Settings2,
   ShieldCheck,
+  UserRound,
   X,
   Zap,
 } from 'lucide-react'
@@ -62,11 +63,11 @@ export default function Shell() {
         ? 'New project'
         : location.pathname.includes('security')
           ? 'Sign-in security'
-          : location.pathname.includes('sessions')
-          ? 'Sessions'
-          : location.pathname === '/profile'
-            ? 'Account settings'
-            : 'Workspace')
+          : location.pathname.includes('profile')
+            ? 'Profile'
+            : location.pathname.includes('sessions')
+              ? 'Sessions'
+              : 'Workspace')
   const results = [
     ...nav.map((n) => ({ name: n.name, to: n.to, icon: n.icon })),
     ...projects.map((p) => ({ name: p.name, to: `/project/${p._id}`, icon: Box })),
@@ -123,6 +124,10 @@ export default function Shell() {
           <NavLink to="/settings/security" onClick={() => setMobile(false)}>
             <ShieldCheck size={18} />
             Sign-in security
+          </NavLink>
+          <NavLink to="/settings/profile" onClick={() => setMobile(false)}>
+            <UserRound size={18} />
+            Profile
           </NavLink>
         </nav>
         <div className="sidebar-bottom">
@@ -277,6 +282,10 @@ export default function Shell() {
       {dialog === 'account' && (
         <Modal title="Your account" description={user?.email} onClose={() => setDialog(null)}>
           <div className="command-results">
+            <button onClick={() => openPage('/settings/profile')}>
+              <UserRound size={18} />
+              Profile settings
+            </button>
             <button
               onClick={() => {
                 setDialog(null)
