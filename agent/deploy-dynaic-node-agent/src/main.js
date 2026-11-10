@@ -1,19 +1,20 @@
 
 import { buildApp } from "./app.js";
-import { nodeVerify } from "./config/nodeVerify.js";
-import { envs } from "./lib/env.js";
-import { connectRedis } from "./config/redis.js";
-import { connectRabbitMQ } from "./config/rabbitmq.js";
+const app = await buildApp();
 
 
-const app = buildApp();
+const [{ nodeVerify }, { connectRabbitMQ }, { connectRedis }] = await Promise.all([
+    import('./config/nodeVerify.js'),
+    import('./config/rabbitmq.js'),
+    import('./config/redis.js')
+]);
 
 
 // jobs shedule
-import './jobs/nodeverification.jobs.js'
+await import('./jobs/nodeverification.jobs.js');
 
 
-async function start() {
+const start = async (PORT) => {
     try {
 
         await nodeVerify();
@@ -21,7 +22,7 @@ async function start() {
         await connectRabbitMQ()
         app.listen({
             host: "127.0.0.1",
-            port: envs.PORT,
+            port: PORT,
         });
     } catch (error) {
         app.log.error(error);
@@ -29,4 +30,4 @@ async function start() {
     }
 }
 
-start();
+await start(process.env.PORT);
