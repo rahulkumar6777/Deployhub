@@ -1,13 +1,14 @@
 
 import Fastify from "fastify";
-import dotenv from 'dotenv';
-dotenv.config();
+import { loadSecrets } from './config/secretsloader.js';
 
 
-export function buildApp() {
+export async function buildApp() {
   const app = Fastify({
     logger: true,
   });
+
+  await loadSecrets()
 
   app.get("/health", async () => {
     return {
