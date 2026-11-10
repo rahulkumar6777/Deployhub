@@ -41,3 +41,9 @@ export const getRedis = () => {
     return redis;
 
 };
+
+export const closeRedis = async () => {
+    if (!redis) return;
+    await redis.quit();
+    redis = null;
+};
