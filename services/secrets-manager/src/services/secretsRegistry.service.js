@@ -120,6 +120,24 @@ export const getSecretsForService = async (serviceName) => {
             INTERNAL_SECRET: env.INTERNAL_SECRET,
             DOMAINDROP_SPACE_ID: env.DOMAINDROP_SPACE_ID,
             DOMAINDROP_API_KEY: env.DOMAINDROP_API_KEY,
+        },
+        'static-deploy-node-agent': {
+            NODE_ENV: env.NODE_ENV,
+            PORT: env.DEPLOY_STATIC_NODE_AGENT_PORT,
+            NODE_MANAGER_URL: env.NODE_MANAGER_URL,
+            REDIS_HOST: env.REDIS_HOST,
+            REDIS_PASSWORD: env.REDIS_PASSWORD,
+            REDIS_PORT: env.REDIS_PORT,
+            RABBIT_MQ_URL: env.RABBITMQ_URL,
+            IDENTITY_SERVICE_URL: env.IDENTITY_SERVICE_URL,
+            PROJECT_SERVICE_URL: env.PROJECT_SERVICE_URL,
+            BUILD_SERVICE_URL: env.BUILD_SERVICE_URL,
+            DOCKER_USERNAME: env.DOCKER_USERNAME,
+            DOCKER_PASSWORD: env.DOCKER_PASSWORD,
+            INTERNAL_SERVICE_TALKING_SECRET: env.INTERNAL_SERVICE_TALKING_SECRET,
+            INTERNAL_SECRET: env.INTERNAL_SECRET,
+            DOMAINDROP_SPACE_ID: env.DOMAINDROP_SPACE_ID,
+            DOMAINDROP_API_KEY: env.DOMAINDROP_API_KEY,
         }
     }
 
@@ -133,6 +151,7 @@ export function getRegisteredServices() {
         'project-service',
         'build-service',
         'build-node-agent',
-        'dynamic-deploy-node-agent'
+        'dynamic-deploy-node-agent',
+        'static-deploy-node-agent',
     ];
 }

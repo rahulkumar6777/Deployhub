@@ -31,7 +31,9 @@ const schema = z.object({
   AGENT_SERVICE_PORT: z.coerce.number().default(4011),
   BUILD_NODE_AGENT_PORT: z.coerce.number().default(4522),
   DEPLOY_DYNAMIC_NODE_AGENT_PORT: z.number().default(4521),
+  DEPLOY_STATIC_NODE_AGENT_PORT: z.number().default(4523),
 
+  
   REDIS_HOST: z.string(),
   REDIS_PORT: z.coerce.number(),
   REDIS_PASSWORD: z.string(),
