@@ -44,7 +44,6 @@ export const connectRabbitMQ = async () => {
         });
 
         await channel.assertQueue(QUEUE_NAMES.BUILD_STATUS_QUEUE, { durable: true });
-        await channel.assertQueue(QUEUE_NAMES.BUILD_DATA_UPDATE_QUEUE, { durable: true });
 
         console.log("RabbitMQ connected");
 
