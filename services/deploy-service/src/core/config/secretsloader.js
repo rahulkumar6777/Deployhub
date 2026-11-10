@@ -6,7 +6,7 @@ dotenv.config();
 
 const SECRETS_MANAGER_URL = process.env.SECRETS_MANAGER_URL;
 const BOOTSTRAP_TOKEN = process.env.BOOTSTRAP_TOKEN;
-const SERVICE_NAME = process.env.BUILD_SERVICE_NAME;
+const SERVICE_NAME = process.env.DEPLOY_SERVICE_NAME;
 
 export async function loadSecrets() {
     return loadSecretsFromManager({
