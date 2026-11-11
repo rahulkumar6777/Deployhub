@@ -359,7 +359,7 @@ export const globalBuildSheduler = async () => {
 
                 const terminalStatus = buildStatus === 'success' ? buildAndDeployStatusForQueues.build['build-completed'] : buildAndDeployStatusForQueues.build['build-failed'];
                 const projectStatus = buildStatus === 'success' ? 'deploying' : 'build-failed';
-                
+
                 const statusPayload = {
                     event: 'BUILD',
                     buildId,
@@ -390,9 +390,7 @@ export const globalBuildSheduler = async () => {
                         { persistent: true, contentType: 'application/json' },
                     );
 
-                    await channel.sendToQueue(
-                        QUEUE_NAMES.PROJECT_STATUS_UPDATE_QUEUE,
-                        Buffer.from(JSON.stringify({ projectId, status: projectStatus })),
+                    await channel.sendToQueue(QUEUE_NAMES.PROJECT_STATUS_UPDATE_QUEUE, Buffer.from(JSON.stringify({ projectId, status: projectStatus })),
                         { persistent: true, contentType: 'application/json' },
                     );
 
