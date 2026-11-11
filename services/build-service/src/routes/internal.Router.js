@@ -1,7 +1,7 @@
 import express from 'express';
 import { createBuildValidator } from '../validators/createBuild.validator.js';
-import { createBuildController } from '../controllers/createBuild.controller.js';
-import { activateBuildController } from '../controllers/activateBuild.controller.js';
+import { createBuildController } from '../controllers/for-internal-service/createBuild.controller.js';
+import { activateBuildController } from '../controllers/for-internal-service/activateBuild.controller.js';
 import { activateBuildValidator } from '../validators/activateBuild.validator.js';
 import { internalApiCallMiddleware } from '../../../../shared/middlewares/interalApiCall.js';
 import { buildEnv } from '../lib/env.js';

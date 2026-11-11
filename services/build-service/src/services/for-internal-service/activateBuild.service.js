@@ -1,5 +1,5 @@
-import { Build } from '../models/build.model.js';
-import { AppError } from '../../../../shared/errors/AppError.js';
+import { Build } from '../../models/build.model.js';
+import { AppError } from '../../../../../shared/errors/AppError.js';
 
 export const activateBuildService = async ({ buildId, userId, projectId }) => {
     const build = await Build.findOne({ _id: buildId, userId });

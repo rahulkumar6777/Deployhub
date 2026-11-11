@@ -1,4 +1,4 @@
-import { Build } from '../models/build.model.js';
+import { Build } from '../../models/build.model.js';
 
 
 export const createBuildService = async (data) => {

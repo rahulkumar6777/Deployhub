@@ -1,6 +1,6 @@
 import { validationResult } from 'express-validator';
-import { returnError } from '../../../../shared/errors/sendError.js';
-import { activateBuildService } from '../services/activateBuild.service.js';
+import { returnError } from '../../../../../shared/errors/sendError.js';
+import { activateBuildService } from '../../services/for-internal-service/activateBuild.service.js';
 
 export const activateBuildController = async (req, res) => {
     try {
