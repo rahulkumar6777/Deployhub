@@ -10,6 +10,7 @@ import { Project } from '../../models/project.model.js';
 import { PendingOrder } from '../../models/PendingOrder.js';
 import { activateBuild } from '../../../utils/activateBuild.js';
 import { AppError } from '../../../../../shared/errors/AppError.js';
+import { triggers } from '../../../../../shared/constants/triggers.js';
 
 
 
@@ -130,7 +131,8 @@ export const paymentVerifyController = async (req, res) => {
             buildId,
             projectType: updatedProject.type,
             ...data,
-            firstTime: true
+            firstTime: true,
+            trigger: triggers['initial-build'],
         });
 
         pendingOrder.status = 'completed';

@@ -8,6 +8,7 @@ import { publishProjectStatus } from '../../../../../shared/utils/publishProject
 import { getRedis } from '../../core/redis/client.js';
 import { createBuild } from '../../../utils/createBuild.js';
 import { buildAndDeployStatusForQueues } from '../../../../../shared/constants/buildanddeploystatusforqueues.js';
+import { triggers } from '../../../../../shared/constants/triggers.js';
 
 
 export const createProject = async (req, res) => {
@@ -61,7 +62,8 @@ export const createProject = async (req, res) => {
             buildId,
             projectType: project.type,
             ...data,
-            firstTime: true
+            firstTime: true,
+            trigger: triggers['initial-build'],
         });
 
         return res.status(201).json({
