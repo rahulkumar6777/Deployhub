@@ -38,7 +38,7 @@ export const suggestNodeService = async (resources) => {
 
     const nodes = await Node.find({ status: "active", type: nodeType }).lean();
     if (!nodes || nodes.length === 0) {
-        throw new AppError("No active nodes found", 404);
+        return null;
     }
 
     for (const node of nodes) {
@@ -158,6 +158,6 @@ export const suggestNodeService = async (resources) => {
         }
     }
 
-    throw new AppError("No node has enough available resources", 404);
+    return null;
 
 }
