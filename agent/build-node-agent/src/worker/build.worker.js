@@ -367,6 +367,7 @@ export const globalBuildSheduler = async () => {
                     userId: content.userId,
                     projectName: content.projectName,
                     projectType: content.projectType || projectData?.type,
+                    firstTime: content.firstTime === true,
                     allocationId: content.allocationId,
                     commitSha,
                     startedAt,
@@ -375,7 +376,7 @@ export const globalBuildSheduler = async () => {
                     projectStatus,
                     logUrl: logsUrl,
                     artifactUrl,
-                    dockerImage: imageName
+                    dockerImage: projectData?.type === 'static' ? null : imageName
                 };
 
                 try {
