@@ -35,8 +35,21 @@ app.use(createInternalAUthMiddleware({
     header: "x-internal-secret",
 }));
 
+
+// ye api internal communication ke liye
+import internalRouter from './routes/internal.Router.js';
+app.use('/internal', internalRouter);
+
+
+
 import userContext from "../../../shared/middlewares/userContext.js";
 app.use(userContext);
+
+
+
+//router
+import deployRoutes from './routes/deploy.router.js';
+app.use('/', deployRoutes);
 
 
 export default async function startApp(port, service_name) {
