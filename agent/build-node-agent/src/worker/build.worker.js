@@ -71,11 +71,14 @@ export const globalBuildSheduler = async () => {
         let logsUrl = null;
         let artifactUrl = null;
         let buildStatus = 'failed';
+        let idempotencyKey;
 
         try {
             content = JSON.parse(msg.content.toString());
             ({ buildId, projectId } = content);
-            const { event, userId, projectName, firstTime, status, projectType, allocationId } = content;
+            const { event, userId, projectName, firstTime, status, projectType, allocationId, trigger } = content;
+
+            if (buildId && trigger) return idempotencyKey = `${trigger}:${buildId}`;
 
             logger = new BuildLogger(buildId, projectId);
             await logger.start();
@@ -394,7 +397,7 @@ export const globalBuildSheduler = async () => {
                         { persistent: true, contentType: 'application/json' },
                     );
 
-                    await channel.sendToQueue(QUEUE_NAMES.GLOBAL, Buffer.from(JSON.stringify({ ...statusPayload, status: terminalStatus })),
+                    await channel.sendToQueue(QUEUE_NAMES.GLOBAL, Buffer.from(JSON.stringify({ ...statusPayload, idempotencyKey, status: terminalStatus })),
                         { persistent: true, contentType: 'application/json' },
                     );
 
